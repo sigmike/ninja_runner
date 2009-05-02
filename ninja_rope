@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'ninja_rope'
+
+game = Game.new
+game.scenario = ""
+game.start
+while not game.end?
+  game.update
+end

@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'ninja_rope'
+
+game = NinjaRope.new
+game.start
+while not game.end?
+  game.update
+end
