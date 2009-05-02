@@ -52,6 +52,15 @@ class Game
   def update
     lifetime = @clock.lifetime
     
+    events = Rubygame.fetch_sdl_events
+    events.each do |event|
+      if event.is_a? Rubygame::KeyUpEvent
+        if event.key == Rubygame::K_ESCAPE
+          @end = true
+        end
+      end
+    end
+    
     loop do
       break if @game_events.nil?
       break if @game_events.empty?
