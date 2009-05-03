@@ -9,3 +9,8 @@ Scenario: Escape is pressed and the game ends
   Given escape was pressed
   When the game updates
   Then the game should end
+
+Scenario: The game window is created
+  When the game starts
+  Then the game window should be created
+  

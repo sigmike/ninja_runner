@@ -70,3 +70,7 @@ end
 Then /^the game should end$/ do
   @game.end?.should be_true
 end
+
+Then /^the game window should be created$/ do
+  @game.screen.class.should == Rubygame::Screen
+end

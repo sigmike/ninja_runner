@@ -1,8 +1,13 @@
 require 'rubygame'
+Rubygame.init
 
 class Rubygame::Rect
   def inside?(other)
-    other.contain?(self)
+    if other.is_a? Rubygame::Screen
+      inside?(Rubygame::Rect.new(0, 0, other.size[0], other.size[1]))
+    else
+      other.contain?(self)
+    end
   end
 end
 
@@ -31,9 +36,9 @@ class Game
   
   def start
     @player = Player.new
-    @screen = Rubygame::Rect.new(0, 0, 0, 0)
     @clock = Rubygame::Clock.new
     @grid = Array.new(100) { Array.new(100) }
+    @screen = Rubygame::Screen.new([800, 600])
   end
   
   def scenario=(scenario)
