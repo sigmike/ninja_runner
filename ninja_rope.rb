@@ -42,7 +42,7 @@ class Player
     apply_direction
     @movement_lifetime = lifetime
   end
-  
+  @font
   def stop_moving
     @direction = nil
     @movement_lifetime = nil
@@ -92,6 +92,8 @@ class Game
   def start
     @player = Player.new(self)
     @clock = Rubygame::Clock.new
+    Rubygame::TTF.setup
+    @font = Rubygame::TTF.new 'fonts/arial.ttf', 23
     @width = 40
     @height = 24
     @score = 0
@@ -326,6 +328,7 @@ class Game
 
     draw_player
 
+    @font.render(score.to_s, true, [255, 255, 255]).blit(@screen, [100, 25])
     @screen.update
   end
   

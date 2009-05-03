@@ -185,10 +185,6 @@ Then /^the music should not be playing$/ do
   @game.music_playing?.should_not be_true
 end
 
-When /^the game is updated$/ do
-  @game.update
-end
-
 Then /^the score should be (\d+)$/ do |score|
    @game.score.should == score.to_i
 end
