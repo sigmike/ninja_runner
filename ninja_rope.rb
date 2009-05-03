@@ -3,7 +3,7 @@ require 'rubygame/mediabag'
 Rubygame.init
 
 ITEM_LIFETIME = 2000
-REPEAT_TIME = 200
+REPEAT_TIME = 50
 CELL_SIZE = 24
 
 class Rubygame::Rect
@@ -86,7 +86,7 @@ class Item
 end
 
 class Game
-  attr_accessor :player, :screen, :scenario, :clock, :grid, :music_enabled
+  attr_accessor :player, :screen, :scenario, :clock, :grid, :music_enabled, :score
   attr_reader :width, :height
   
   def start
@@ -94,6 +94,7 @@ class Game
     @clock = Rubygame::Clock.new
     @width = 40
     @height = 24
+    @score = 0
     @grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([@width * 24, @height * 24])
     if @music_enabled
@@ -168,6 +169,7 @@ class Game
         case event.key
         when Rubygame::K_ESCAPE
           @end = true
+          puts "score is #{@score}"
         when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
           @player.stop_moving if @player.direction == key_direction(event.key)
         end
@@ -210,6 +212,13 @@ class Game
   def update_player(lifetime)
     @player.move(lifetime)
   end
+  
+  def catch_item
+    if item(@player.position.x, @player.position.y)
+       @grid[@player.position.x][@player.position.y] = nil
+       @score += 10
+    end
+  end
 
   def update
     @screen.fill([0,0,0])
@@ -222,6 +231,8 @@ class Game
     update_grid(lifetime)
     update_player(lifetime)
 
+    catch_item
+    
     draw
   end
   

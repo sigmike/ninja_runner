@@ -59,11 +59,16 @@ When /^the clock goes to (.+)$/ do |time|
   game_update_at(time_value)
 end
 
-Then /^an item is at (\d+),(\d+)$/ do |x, y|
+Given /^an item is at (\d+),(\d+)$/  do |x, y|
+  item = Item.new @game.clock.lifetime
+  @game.grid[x.to_i][y.to_i] = item
+end
+
+Then /^an item should be at (\d+),(\d+)$/ do |x, y|
   @game.item(x.to_i, y.to_i).should_not be_nil
 end
 
-Then /^there's no item at (\d+),(\d+)$/ do |x, y|
+Then /^there should be no item at (\d+),(\d+)$/ do |x, y|
   @game.item(x.to_i, y.to_i).should be_nil
 end
 
@@ -178,4 +183,12 @@ end
 
 Then /^the music should not be playing$/ do
   @game.music_playing?.should_not be_true
+end
+
+When /^the game is updated$/ do
+  @game.update
+end
+
+Then /^the score should be (\d+)$/ do |score|
+   @game.score.should == score.to_i
 end
