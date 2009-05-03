@@ -192,3 +192,7 @@ end
 Then /^the score should be (\d+)$/ do |score|
    @game.score.should == score.to_i
 end
+
+Then /^a record item is at (\d+),(\d+)$/ do |x, y|
+  @game.record_item(x.to_i, y.to_i).should_not be_nil
+end
