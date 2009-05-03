@@ -5,7 +5,11 @@ require 'ninja_rope'
 
 game = Game.new
 timer = 0
-game.scenario = File.read(ARGV.first)
+scenario = ""
+if ARGV.first
+  scenario = File.read(ARGV.first)
+end
+game.scenario = scenario
   ((1..12).map { |x|
     (1..14).map { |y|
       timer += 100
