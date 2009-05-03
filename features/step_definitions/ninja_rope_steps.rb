@@ -23,7 +23,7 @@ Then /^the player is inside the screen$/ do
 end
 
 def new_rect(values)
-  Rubygame::Rect.new(*values.split.map(&:to_f))
+  Rubygame::Rect.new(*values.split.map { |n| n.to_f })
 end
 
 Given /^the rect is at (.+)$/ do |values|
