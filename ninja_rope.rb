@@ -29,12 +29,16 @@ class GameEvent
 end
 
 class Item
+  attr_accessor :life
+  
   def initialize birthtime
     @birthtime = birthtime
+    @life = 255
   end
   
   def update current_time
-    @alive = (current_time - @birthtime) <= 1000
+    @life = (3000 - (current_time - @birthtime)) * 255 / 3000
+    @alive = (current_time - @birthtime) <= 3000
   end
   
   def alive?
@@ -52,14 +56,16 @@ class Game
     @height = 100
     @grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([800, 600])
+    @music = Rubygame::Music.load "music/2 - Please.mp3"
+    @music.play
   end
   
   def scenario=(scenario)
     @game_events = scenario.split("\n").map { |line|
       if line =~ /(\d+) (\d+),(\d+)/
         time = $1.to_i
-        x = $2.to_i
-        y = $3.to_i
+        x = $2.to_i / 24
+        y = $3.to_i / 24
         GameEvent.new(time, x, y)
       else
         raise "Invalid line: #{line.inspect}"
@@ -90,9 +96,12 @@ class Game
     events = Rubygame.fetch_sdl_events
     events.each do |event|
       if event.is_a? Rubygame::KeyUpEvent
-        #if event.key == Rubygame::K_ESCAPE
+        if event.key == Rubygame::K_ESCAPE
           @end = true
-        #end
+        else
+        end
+      elsif event.is_a? Rubygame::MouseDownEvent
+        puts "#{lifetime} #{event.pos[0]},#{event.pos[1]}"
       end
     end
     
@@ -112,14 +121,16 @@ class Game
     end
 
     each_item do |x, y, item|
-      draw_item(x, y)
+      draw_item(x, y, item)
     end
     @screen.update
   end
   
-  def draw_item(x, y)
+  def draw_item(x, y, item)
     sprite_size = 24
-    Rubygame::Surface.load_image('gfx/bonus.png').blit(@screen, [x * sprite_size, y * sprite_size])
+    surface = Rubygame::Surface.load_image('gfx/bonus.png').to_display
+    surface.set_alpha item.life
+    surface.blit(@screen, [x * sprite_size, y * sprite_size])
   end
   
   def item(x, y)
