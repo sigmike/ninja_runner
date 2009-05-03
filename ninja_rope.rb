@@ -1,4 +1,5 @@
 require 'rubygame'
+require 'rubygame/mediabag'
 Rubygame.init
 
 ITEM_LIFETIME = 2000
@@ -60,6 +61,10 @@ class Game
     @screen = Rubygame::Screen.new([@width * 24, @height * 24])
     @music = Rubygame::Music.load "music/2 - Please.mp3"
     @music.play
+    @media_bag = Rubygame::MediaBag.new
+    @media_bag.load_image "gfx/ninja.png"
+    @media_bag.load_image "gfx/bonus.png"
+    @media_bag.load_image "gfx/brick.png"
   end
   
   def grid_size
@@ -175,7 +180,7 @@ class Game
   
   def draw_player
     sprite_size = 24
-    surface = Rubygame::Surface.load_image('gfx/ninja.png').to_display
+    surface = @media_bag['gfx/ninja.png']
     position = @player.position.dup
     position.x *= 24
     position.y *= 24
@@ -184,7 +189,7 @@ class Game
   
   def draw_item(x, y, item)
     sprite_size = 24
-    surface = Rubygame::Surface.load_image('gfx/bonus.png').to_display
+    surface = @media_bag['gfx/bonus.png']
     surface.set_alpha item.life
     surface.blit(@screen, [x * sprite_size, y * sprite_size])
   end
