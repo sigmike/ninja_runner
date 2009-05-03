@@ -13,10 +13,7 @@ Scenario: Record multiple events while draging with the mouse
   And the event 1 is "160 2,1"
   And the event 2 is "180 3,1"
   And there's no event 3
-  Then a record item is at 1,1
-  Then a record item is at 2,1
-  Then a record item is at 3,1
-
+  
 Scenario: No record if mouse button is not pressed
   Given the events are recorded
   And the game is started

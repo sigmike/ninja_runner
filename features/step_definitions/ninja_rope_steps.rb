@@ -8,6 +8,9 @@ include FlexMock::MockContainer
 Before do
   @game = Game.new
   @mouse_buttons = []
+  flexmock(Rubygame::Music).should_receive(:load).and_return do
+    flexmock(:play => nil)
+  end
 end
 
 When /^the game starts$/ do
@@ -165,7 +168,14 @@ Then /^the grid size should be 40,24$/ do
   @game.grid_size.should == [40, 24]
 end
 
-Then /^a record item is at (\d+),(\d+)$/ do |x, y|
-  @game.record_item(x.to_i, y.to_i).should_not be_nil
+Given /^the music is (enabled|disabled)$/ do |status|
+  @game.music_enabled = (status == "enabled" ? true : false)
 end
 
+Then /^the music should be playing$/ do
+  @game.music_playing?.should be_true
+end
+
+Then /^the music should not be playing$/ do
+  @game.music_playing?.should_not be_true
+end

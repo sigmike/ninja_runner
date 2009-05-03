@@ -3,8 +3,8 @@ require 'rubygame/mediabag'
 Rubygame.init
 
 ITEM_LIFETIME = 2000
-CELL_SIZE = 24
 REPEAT_TIME = 200
+CELL_SIZE = 24
 
 class Rubygame::Rect
   def inside?(other)
@@ -86,7 +86,7 @@ class Item
 end
 
 class Game
-  attr_accessor :player, :screen, :scenario, :clock, :grid
+  attr_accessor :player, :screen, :scenario, :clock, :grid, :music_enabled
   attr_reader :width, :height
   
   def start
@@ -95,14 +95,19 @@ class Game
     @width = 40
     @height = 24
     @grid = Array.new(@width) { Array.new(@height) }
-    @record_grid = Array.new(@width) { Array.new(@height) }
-    @screen = Rubygame::Screen.new([@width * CELL_SIZE, @height * CELL_SIZE])
-    @music = Rubygame::Music.load "music/2 - Please.mp3"
-    @music.play
+    @screen = Rubygame::Screen.new([@width * 24, @height * 24])
+    if @music_enabled
+      @music = Rubygame::Music.load "music/2 - Please.mp3"
+      @music.play
+    end
     @media_bag = Rubygame::MediaBag.new
     @media_bag.load_image "gfx/ninja.png"
     @media_bag.load_image "gfx/bonus.png"
     @media_bag.load_image "gfx/brick.png"
+  end
+  
+  def music_playing?
+    @music
   end
   
   def grid_size
@@ -120,21 +125,6 @@ class Game
         raise "Invalid line: #{line.inspect}"
       end
     }
-  end
-
-  def each_record_cell
-    @width.times { |x|
-      @height.times { |y|
-        item = @record_grid[x][y]
-        yield x, y, item
-      }
-    }
-  end
-  
-  def each_record_item
-    each_record_cell do |x, y, item|
-      yield x, y, item if item
-    end
   end
 
   def each_cell
@@ -183,18 +173,16 @@ class Game
         end
       when Rubygame::MouseMotionEvent
         if event.buttons.include?(Rubygame::MOUSE_LEFT)
-          x, y = event.pos.map { |n| n / CELL_SIZE }
+          x, y = event.pos.map { |n| n / 24 }
           cell = [x, y]
           if cell != @last_mouse_cell
             @last_mouse_cell = cell
-            @record_grid[x][y] = Item.new lifetime
             puts "#{lifetime} #{x},#{y}"
           end
         end
       when Rubygame::MouseDownEvent
-        x, y = event.pos.map { |n| n / CELL_SIZE }
+        x, y = event.pos.map { |n| n / 24 }
         cell = [x, y]
-        @record_grid[x][y] = Item.new lifetime
         puts "#{lifetime} #{x},#{y}"
       end
     end
@@ -223,15 +211,6 @@ class Game
     @player.move(lifetime)
   end
 
-  def update_record_grid(lifetime)
-    each_record_item do |x, y, item|
-      item.update lifetime
-      unless item.alive?
-        @record_grid[x][y] = nil
-      end
-    end
-  end
-
   def update
     @screen.fill([0,0,0])
   
@@ -241,7 +220,6 @@ class Game
     process_game_events(lifetime)
     
     update_grid(lifetime)
-    update_record_grid(lifetime)
     update_player(lifetime)
 
     draw
@@ -251,18 +229,12 @@ class Game
     each_item do |x, y, item|
       draw_item(x, y, item)
     end
-
-    each_record_item do |x, y, item|
-      draw_item(x, y, item)
-    end
-
     draw_player
-
     @screen.update
   end
   
   def draw_player
-    surface = @media_bag['gfx/ninja.png'].to_display
+    surface = @media_bag['gfx/ninja.png']
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE
@@ -270,17 +242,13 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = @media_bag['gfx/bonus.png'].to_display
+    surface = @media_bag['gfx/bonus.png']
     surface.set_alpha item.life
     surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
   
   def item(x, y)
     @grid[x][y]
-  end
-
-  def record_item(x, y)
-    @record_grid[x][y]
   end
   
   def end?

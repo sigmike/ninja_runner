@@ -20,6 +20,7 @@ game.scenario = scenario
     timer += 100
     "#{timer} #{rand 30},#{rand 25}"
   }).join("\n")
+game.music_enabled = true
 game.start
 while not game.end?
   game.update
