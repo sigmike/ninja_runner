@@ -3,6 +3,7 @@ require 'rubygame/mediabag'
 Rubygame.init
 
 ITEM_LIFETIME = 2000
+CELL_SIZE = 24
 
 class Rubygame::Rect
   def inside?(other)
@@ -179,19 +180,17 @@ class Game
   end
   
   def draw_player
-    sprite_size = 24
     surface = @media_bag['gfx/ninja.png']
     position = @player.position.dup
-    position.x *= 24
-    position.y *= 24
+    position.x *= CELL_SIZE
+    position.y *= CELL_SIZE
     surface.blit(@screen, position)
   end
   
   def draw_item(x, y, item)
-    sprite_size = 24
     surface = @media_bag['gfx/bonus.png']
     surface.set_alpha item.life
-    surface.blit(@screen, [x * sprite_size, y * sprite_size])
+    surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
   
   def item(x, y)
