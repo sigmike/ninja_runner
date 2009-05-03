@@ -2,6 +2,7 @@ require 'rubygame'
 Rubygame.init
 
 ITEM_LIFETIME = 2000
+REPEAT_TIME = 200
 
 class Rubygame::Rect
   def inside?(other)
@@ -14,10 +15,44 @@ class Rubygame::Rect
 end
 
 class Player
-  attr_accessor :position
+  attr_accessor :position, :direction
   
-  def initialize
+  def initialize(game)
+    @game = game
     @position = Rubygame::Rect.new(0, 0, 0, 0)
+  end
+  
+  def apply_direction
+    d = {
+      :right => [1, 0],
+      :left => [-1, 0],
+      :up => [0, -1],
+      :down => [0, 1],
+    }[@direction]
+    @position.x += d[0]
+    @position.y += d[1]
+    @position.x %= @game.width
+    @position.y %= @game.height
+  end
+  
+  def start_moving(direction, lifetime)
+    @direction = direction
+    apply_direction
+    @movement_lifetime = lifetime
+  end
+  
+  def stop_moving
+    @direction = nil
+    @movement_lifetime = nil
+  end
+  
+  def move(lifetime)
+    if @direction
+      while lifetime >= @movement_lifetime + REPEAT_TIME
+        apply_direction
+        @movement_lifetime += REPEAT_TIME
+      end
+    end
   end
 end
 
@@ -50,9 +85,10 @@ end
 
 class Game
   attr_accessor :player, :screen, :scenario, :clock, :grid
+  attr_reader :width, :height
   
   def start
-    @player = Player.new
+    @player = Player.new(self)
     @clock = Rubygame::Clock.new
     @width = 40
     @height = 24
@@ -93,28 +129,35 @@ class Game
       yield x, y, item if item
     end
   end
-
+  
+  def key_direction(key)
+    case key
+    when Rubygame::K_RIGHT
+      :right
+    when Rubygame::K_LEFT
+      :left
+    when Rubygame::K_UP
+      :up
+    when Rubygame::K_DOWN
+      :down
+    end
+  end
+  
   def process_events(lifetime)
     events = Rubygame.fetch_sdl_events
     events.each do |event|
       case event
+      when Rubygame::KeyDownEvent
+        case event.key
+        when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
+          @player.start_moving(key_direction(event.key), lifetime)
+        end
       when Rubygame::KeyUpEvent
         case event.key
         when Rubygame::K_ESCAPE
           @end = true
-        when Rubygame::K_RIGHT
-          @player.position.x += 1
-          @player.position.x %= @width
-        when Rubygame::K_LEFT
-          @player.position.x -= 1
-          @player.position.x %= @width
-        when Rubygame::K_UP
-          @player.position.y -= 1
-          @player.position.y %= @height
-        when Rubygame::K_DOWN
-          @player.position.y += 1
-          @player.position.y %= @height
-        else
+        when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
+          @player.stop_moving if @player.direction == key_direction(event.key)
         end
       when Rubygame::MouseMotionEvent
         if event.buttons.include?(Rubygame::MOUSE_LEFT)
@@ -151,6 +194,10 @@ class Game
       end
     end
   end
+  
+  def update_player(lifetime)
+    @player.move(lifetime)
+  end
 
   def update
     @screen.fill([0,0,0])
@@ -161,6 +208,7 @@ class Game
     process_game_events(lifetime)
     
     update_grid(lifetime)
+    update_player(lifetime)
 
     draw
   end

@@ -135,7 +135,7 @@ Given /^the player is at position (\d+),(\d+)$/ do |x, y|
   @game.player.position.y = y.to_i
 end
 
-When /^the (.+) key is pressed$/ do |key|
+When /^the (.+) key is (pressed down|released)$/ do |key, action|
   mapping = {
     "right" => Rubygame::K_RIGHT,
     "left" => Rubygame::K_LEFT,
@@ -145,7 +145,14 @@ When /^the (.+) key is pressed$/ do |key|
   symbol = mapping[key]
   raise "Invalid key: #{key.inspect}" unless symbol
   
-  event = Rubygame::KeyUpEvent.new(symbol, [])
+  case action
+  when "pressed down"
+    klass = Rubygame::KeyDownEvent
+  when "released"
+    klass = Rubygame::KeyUpEvent
+  end
+   
+  event = klass.new(symbol, [])
   flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
   @game.update
 end
