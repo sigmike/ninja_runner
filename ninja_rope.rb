@@ -96,7 +96,7 @@ class Game
     @height = 24
     @score = 0
     @grid = Array.new(@width) { Array.new(@height) }
-    @screen = Rubygame::Screen.new([@width * 24, @height * 24])
+    @screen = Rubygame::Screen.new([@width * CELL_SIZE, @height * CELL_SIZE])
     if @music_enabled
       @music = Rubygame::Music.load "music/2 - Please.mp3"
       @music.play
@@ -175,7 +175,7 @@ class Game
         end
       when Rubygame::MouseMotionEvent
         if event.buttons.include?(Rubygame::MOUSE_LEFT)
-          x, y = event.pos.map { |n| n / 24 }
+          x, y = event.pos.map { |n| n / CELL_SIZE }
           cell = [x, y]
           if cell != @last_mouse_cell
             @last_mouse_cell = cell
@@ -183,7 +183,7 @@ class Game
           end
         end
       when Rubygame::MouseDownEvent
-        x, y = event.pos.map { |n| n / 24 }
+        x, y = event.pos.map { |n| n / CELL_SIZE }
         cell = [x, y]
         puts "#{lifetime} #{x},#{y}"
       end
