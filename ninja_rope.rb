@@ -1,6 +1,8 @@
 require 'rubygame'
 Rubygame.init
 
+ITEM_LIFETIME = 2000
+
 class Rubygame::Rect
   def inside?(other)
     if other.is_a? Rubygame::Screen
@@ -37,8 +39,8 @@ class Item
   end
   
   def update current_time
-    @life = (3000 - (current_time - @birthtime)) * 255 / 3000
-    @alive = (current_time - @birthtime) <= 3000
+    @life = (ITEM_LIFETIME - (current_time - @birthtime)) * 255 / ITEM_LIFETIME
+    @alive = (current_time - @birthtime) <= ITEM_LIFETIME
   end
   
   def alive?
@@ -47,7 +49,7 @@ class Item
 end
 
 class Game
-  attr_accessor :player, :screen, :scenario, :clock
+  attr_accessor :player, :screen, :scenario, :clock, :grid
   
   def start
     @player = Player.new
@@ -64,8 +66,8 @@ class Game
     @game_events = scenario.split("\n").map { |line|
       if line =~ /(\d+) (\d+),(\d+)/
         time = $1.to_i
-        x = $2.to_i / 24
-        y = $3.to_i / 24
+        x = $2.to_i
+        y = $3.to_i
         GameEvent.new(time, x, y)
       else
         raise "Invalid line: #{line.inspect}"
@@ -88,23 +90,33 @@ class Game
     end
   end
 
-  def update
-    @screen.fill([0,0,0])
-  
-    lifetime = @clock.lifetime
-    
+  def process_events(lifetime)
     events = Rubygame.fetch_sdl_events
     events.each do |event|
-      if event.is_a? Rubygame::KeyUpEvent
+      case event
+      when Rubygame::KeyUpEvent
         if event.key == Rubygame::K_ESCAPE
           @end = true
         else
         end
-      elsif event.is_a? Rubygame::MouseDownEvent
-        puts "#{lifetime} #{event.pos[0]},#{event.pos[1]}"
+      when Rubygame::MouseMotionEvent
+        if event.buttons.include?(Rubygame::MOUSE_LEFT)
+          x, y = event.pos.map { |n| n / 24 }
+          cell = [x, y]
+          if cell != @last_mouse_cell
+            @last_mouse_cell = cell
+            puts "#{lifetime} #{x},#{y}"
+          end
+        end
+      when Rubygame::MouseDownEvent
+        x, y = event.pos.map { |n| n / 24 }
+        cell = [x, y]
+        puts "#{lifetime} #{x},#{y}"
       end
     end
-    
+  end
+  
+  def process_game_events(lifetime)
     loop do
       break if @game_events.nil?
       break if @game_events.empty?
@@ -112,14 +124,31 @@ class Game
       event = @game_events.shift
       @grid[event.x][event.y] = Item.new event.time
     end
-    
+  end
+  
+  def update_grid(lifetime)
     each_item do |x, y, item|
       item.update lifetime
       unless item.alive?
         @grid[x][y] = nil
       end
     end
+  end
 
+  def update
+    @screen.fill([0,0,0])
+  
+    lifetime = @clock.lifetime
+    
+    process_events(lifetime)
+    process_game_events(lifetime)
+    
+    update_grid(lifetime)
+
+    draw
+  end
+  
+  def draw
     each_item do |x, y, item|
       draw_item(x, y, item)
     end

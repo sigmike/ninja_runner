@@ -12,9 +12,9 @@ Scenario: An item is present at good time
   When the clock goes to 100
   Then an item is at 2,2
   And there's no item at 3,3
-  When the clock goes to 1100
+  When the clock goes to 100 + ITEM_LIFETIME
   Then an item is at 2,2
-  When the clock goes to 1101
+  When the clock goes to 101 + ITEM_LIFETIME
   Then there's no item at 2,2
-  When the clock goes to 1201
+  When the clock goes to 201 + ITEM_LIFETIME
   Then there's no item at 3,2
