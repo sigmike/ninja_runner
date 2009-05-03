@@ -29,6 +29,17 @@ class GameEvent
 end
 
 class Item
+  def initialize birthtime
+    @birthtime = birthtime
+  end
+  
+  def update current_time
+    @alive = (current_time - @birthtime) <= 1000
+  end
+  
+  def alive?
+    @alive
+  end
 end
 
 class Game
@@ -37,7 +48,9 @@ class Game
   def start
     @player = Player.new
     @clock = Rubygame::Clock.new
-    @grid = Array.new(100) { Array.new(100) }
+    @width = 100
+    @height = 100
+    @grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([800, 600])
   end
   
@@ -53,16 +66,33 @@ class Game
       end
     }
   end
+
+  def each_cell
+    @width.times { |x|
+      @height.times { |y|
+        item = @grid[x][y]
+        yield x, y, item
+      }
+    }
+  end
   
+  def each_item
+    each_cell do |x, y, item|
+      yield x, y, item if item
+    end
+  end
+
   def update
+    @screen.fill([0,0,0])
+  
     lifetime = @clock.lifetime
     
     events = Rubygame.fetch_sdl_events
     events.each do |event|
       if event.is_a? Rubygame::KeyUpEvent
-        if event.key == Rubygame::K_ESCAPE
+        #if event.key == Rubygame::K_ESCAPE
           @end = true
-        end
+        #end
       end
     end
     
@@ -70,9 +100,26 @@ class Game
       break if @game_events.nil?
       break if @game_events.empty?
       break if @game_events.first.time > lifetime
-      event = @game_events.pop
-      @grid[event.x][event.y] = Item.new
+      event = @game_events.shift
+      @grid[event.x][event.y] = Item.new event.time
     end
+    
+    each_item do |x, y, item|
+      item.update lifetime
+      unless item.alive?
+        @grid[x][y] = nil
+      end
+    end
+
+    each_item do |x, y, item|
+      draw_item(x, y)
+    end
+    @screen.update
+  end
+  
+  def draw_item(x, y)
+    sprite_size = 24
+    Rubygame::Surface.load_image('gfx/bonus.png').blit(@screen, [x * sprite_size, y * sprite_size])
   end
   
   def item(x, y)

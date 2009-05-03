@@ -4,7 +4,14 @@ require 'rubygems'
 require 'ninja_rope'
 
 game = Game.new
-game.scenario = ""
+timer = 0
+game.scenario =
+  (1..12).map { |x|
+    (1..14).map { |y|
+      timer += 100
+      "#{timer} #{x},#{y}"
+    }
+  }.join("\n")
 game.start
 while not game.end?
   game.update
