@@ -5,6 +5,18 @@ require 'flexmock/rspec'
 include FlexMock::ArgumentTypes
 include FlexMock::MockContainer
 
+def Rubygame.fetch_sdl_events
+  @events ||= []
+  result = @events.dup
+  @events.clear
+  result
+end
+
+def Rubygame.push_event(event)
+  @events ||= []
+  @events << event
+end
+
 Before do
   @game = Game.new
   @mouse_buttons = []
@@ -73,8 +85,7 @@ Then /^there should be no item at (\d+),(\d+)$/ do |x, y|
 end
 
 Given /^escape was pressed$/ do
-  event = Rubygame::KeyUpEvent.new(Rubygame::K_ESCAPE, [])
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event Rubygame::KeyUpEvent.new(Rubygame::K_ESCAPE, [])
 end
 
 When /^the game updates$/ do
@@ -100,24 +111,21 @@ When /^the mouse button is pressed at cell (\d+),(\d+) and time (\d+)$/ do |x, y
   mouse_x = x.to_i * 24
   mouse_y = y.to_i * 24
   @mouse_buttons << Rubygame::MOUSE_LEFT
-  event = Rubygame::MouseDownEvent.new([mouse_x.to_i, mouse_y.to_i], Rubygame::MOUSE_LEFT)
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event Rubygame::MouseDownEvent.new([mouse_x.to_i, mouse_y.to_i], Rubygame::MOUSE_LEFT)
   game_update_at(time)
 end
 
 When /^the mouse is moved to cell (\d+),(\d+) at time (\d+)$/ do |x, y, time|
   mouse_x = x.to_i * 24
   mouse_y = y.to_i * 24
-  event = Rubygame::MouseMotionEvent.new([mouse_x.to_i, mouse_y.to_i], [0, 0], @mouse_buttons)
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event Rubygame::MouseMotionEvent.new([mouse_x.to_i, mouse_y.to_i], [0, 0], @mouse_buttons)
   game_update_at(time)
 end
 
 When /^the mouse is moved to another position in cell (\d+),(\d+) at time (\d+)$/ do |x, y, time|
   mouse_x = x.to_i * 24 + 3
   mouse_y = y.to_i * 24 + 5
-  event = Rubygame::MouseMotionEvent.new([mouse_x.to_i, mouse_y.to_i], [0, 0], @mouse_buttons)
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event Rubygame::MouseMotionEvent.new([mouse_x.to_i, mouse_y.to_i], [0, 0], @mouse_buttons)
   game_update_at(time)
 end
 
@@ -125,8 +133,7 @@ When /^the mouse button is released at cell (\d+),(\d+) and time (\d+)$/ do |x, 
   mouse_x = x.to_i * 24
   mouse_y = y.to_i * 24
   @mouse_buttons.delete Rubygame::MOUSE_LEFT
-  event = Rubygame::MouseUpEvent.new([mouse_x.to_i, mouse_y.to_i], Rubygame::MOUSE_LEFT)
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event Rubygame::MouseUpEvent.new([mouse_x.to_i, mouse_y.to_i], Rubygame::MOUSE_LEFT)
   game_update_at(time)
 end
 
@@ -160,8 +167,7 @@ When /^the (.+) key is (pressed down|released)$/ do |key, action|
     klass = Rubygame::KeyUpEvent
   end
    
-  event = klass.new(symbol, [])
-  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  Rubygame.push_event klass.new(symbol, [])
   @game.update
 end
 
