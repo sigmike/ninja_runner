@@ -157,3 +157,8 @@ end
 Then /^the grid size should be 40,24$/ do
   @game.grid_size.should == [40, 24]
 end
+
+Then /^a record item is at (\d+),(\d+)$/ do |x, y|
+  @game.record_item(x.to_i, y.to_i).should_not be_nil
+end
+
