@@ -54,12 +54,16 @@ class Game
   def start
     @player = Player.new
     @clock = Rubygame::Clock.new
-    @width = 100
-    @height = 100
+    @width = 40
+    @height = 24
     @grid = Array.new(@width) { Array.new(@height) }
-    @screen = Rubygame::Screen.new([800, 600])
+    @screen = Rubygame::Screen.new([@width * 24, @height * 24])
     @music = Rubygame::Music.load "music/2 - Please.mp3"
     @music.play
+  end
+  
+  def grid_size
+    [@width, @height]
   end
   
   def scenario=(scenario)
@@ -95,8 +99,21 @@ class Game
     events.each do |event|
       case event
       when Rubygame::KeyUpEvent
-        if event.key == Rubygame::K_ESCAPE
+        case event.key
+        when Rubygame::K_ESCAPE
           @end = true
+        when Rubygame::K_RIGHT
+          @player.position.x += 1
+          @player.position.x %= @width
+        when Rubygame::K_LEFT
+          @player.position.x -= 1
+          @player.position.x %= @width
+        when Rubygame::K_UP
+          @player.position.y -= 1
+          @player.position.y %= @height
+        when Rubygame::K_DOWN
+          @player.position.y += 1
+          @player.position.y %= @height
         else
         end
       when Rubygame::MouseMotionEvent
@@ -152,7 +169,17 @@ class Game
     each_item do |x, y, item|
       draw_item(x, y, item)
     end
+    draw_player
     @screen.update
+  end
+  
+  def draw_player
+    sprite_size = 24
+    surface = Rubygame::Surface.load_image('gfx/ninja.png').to_display
+    position = @player.position.dup
+    position.x *= 24
+    position.y *= 24
+    surface.blit(@screen, position)
   end
   
   def draw_item(x, y, item)

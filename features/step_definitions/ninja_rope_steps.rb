@@ -129,3 +129,31 @@ end
 Then /^there's no event (\d+)$/ do |index|
   @recorded_events[index.to_i].should be_nil
 end
+
+Given /^the player is at position (\d+),(\d+)$/ do |x, y|
+  @game.player.position.x = x.to_i
+  @game.player.position.y = y.to_i
+end
+
+When /^the (.+) key is pressed$/ do |key|
+  mapping = {
+    "right" => Rubygame::K_RIGHT,
+    "left" => Rubygame::K_LEFT,
+    "up" => Rubygame::K_UP,
+    "down" => Rubygame::K_DOWN,
+  }
+  symbol = mapping[key]
+  raise "Invalid key: #{key.inspect}" unless symbol
+  
+  event = Rubygame::KeyUpEvent.new(symbol, [])
+  flexmock(Rubygame).should_receive(:fetch_sdl_events).once.and_return([event])
+  @game.update
+end
+
+Then /^player position should be (\d+),(\d+)$/ do |x,y|
+  [@game.player.position.x, @game.player.position.y].should == [x.to_i, y.to_i]
+end
+
+Then /^the grid size should be 40,24$/ do
+  @game.grid_size.should == [40, 24]
+end

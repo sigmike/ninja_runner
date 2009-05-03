@@ -14,3 +14,6 @@ Scenario: The game window is created
   When the game starts
   Then the game window should be created
   
+Scenario: The grid size is known
+  When the game starts
+  Then the grid size should be 40,24
