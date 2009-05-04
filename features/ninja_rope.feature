@@ -10,6 +10,12 @@ Scenario: Escape is pressed and the game ends
   When the game updates
   Then the game should end
 
+Scenario: QuitEvent is invoked and the game ends
+  Given the game is started
+  Given QuitEvent was invoked
+  When the game updates
+  Then the game should end
+
 Scenario: The game window is created
   When the game starts
   Then the game window should be created

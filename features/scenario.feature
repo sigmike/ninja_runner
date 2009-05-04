@@ -4,8 +4,8 @@ Scenario: An item is present at good time
   Given the game is started
   Given a scenario
     """
-    100 2,2
-    200 3,2
+    100 2,2 bonus
+    200 3,2 brick
     """
   When the clock goes to 99
   Then there should be no item at 2,2
@@ -18,3 +18,4 @@ Scenario: An item is present at good time
   Then there should be no item at 2,2
   When the clock goes to 201 + ITEM_LIFETIME
   Then there should be no item at 3,2
+

@@ -171,6 +171,10 @@ When /^the (.+) key is (pressed down|released)$/ do |key, action|
   @game.update
 end
 
+Given /^QuitEvent was invoked$/ do
+  Rubygame.push_event Rubygame::Events::QuitRequested.new
+end
+
 Then /^player position should be (\d+),(\d+)$/ do |x,y|
   [@game.player.position.x, @game.player.position.y].should == [x.to_i, y.to_i]
 end
