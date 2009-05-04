@@ -217,7 +217,6 @@ class Game
         case event.key
         when Rubygame::K_ESCAPE
           @end = true
-          puts "score is #{@score}"
         when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
           @player.stop_moving if @player.direction == key_direction(event.key)
         end
@@ -236,6 +235,8 @@ class Game
         cell = [x, y]
         @record_grid[x][y] = Item.new lifetime
         puts "#{lifetime} #{x},#{y}"
+      when Rubygame::Events::QuitRequested
+        @end = true
       end
     end
   end
