@@ -198,3 +198,7 @@ end
 Then /^a record item is at (\d+),(\d+)$/ do |x, y|
   @game.record_item(x.to_i, y.to_i).should_not be_nil
 end
+
+Then /^the player position should be below (\d+),(\d+)$/ do |x,y|
+  @game.player.position.y.should > y.to_i
+end
