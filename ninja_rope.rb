@@ -56,6 +56,14 @@ class Player
       end
     end
   end
+  
+  def x
+    @position.x
+  end
+  
+  def y
+    @position.y
+  end
 end
 
 class GameEvent
@@ -265,8 +273,8 @@ class Game
   end
   
   def catch_item
-    if item(@player.position.x, @player.position.y)
-       @grid[@player.position.x][@player.position.y] = nil
+    if item(@player.x, @player.y)
+       @grid[@player.x][@player.y] = nil
        @score += 10
     end
   end
