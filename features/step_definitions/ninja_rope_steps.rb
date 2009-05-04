@@ -172,7 +172,7 @@ When /^the (.+) key is (pressed down|released)$/ do |key, action|
 end
 
 Given /^QuitEvent was invoked$/ do
-  Rubygame.push_event Rubygame::Events::QuitRequested.new
+  Rubygame.push_event Rubygame::QuitEvent.new
 end
 
 Then /^player position should be (\d+),(\d+)$/ do |x,y|

@@ -235,7 +235,7 @@ class Game
         cell = [x, y]
         @record_grid[x][y] = Item.new lifetime
         puts "#{lifetime} #{x},#{y}"
-      when Rubygame::Events::QuitRequested
+      when Rubygame::QuitEvent
         @end = true
       end
     end
