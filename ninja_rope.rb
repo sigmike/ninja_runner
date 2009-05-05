@@ -5,6 +5,7 @@ Rubygame.init
 ITEM_LIFETIME = 2000
 REPEAT_TIME = 50
 CELL_SIZE = 24
+GRAVITY = 1 # cell down per second
 
 class Rubygame::Rect
   def inside?(other)
@@ -97,6 +98,8 @@ class Game
     @width = 40
     @height = 24
     @score = 0
+    @millisecond_per_cell_down = 1000 / GRAVITY
+    @last_down_time = 0
     @grid = Array.new(@width) { Array.new(@height) }
     @record_grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([@width * CELL_SIZE, @height * CELL_SIZE])
@@ -298,6 +301,13 @@ class Game
     end
   end
 
+  def apply_gravity lifetime
+    while lifetime - @last_down_time > @millisecond_per_cell_down
+      @player.position.x -= 1
+      @last_down_time += @millisecond_per_cell_down
+    end
+  end
+
   def update
     @screen.fill([0,0,0])
   
@@ -306,6 +316,8 @@ class Game
     process_events(lifetime)
     process_game_events(lifetime)
     
+    apply_gravity(lifetime)
+
     update_grid(lifetime)
     update_record_grid(lifetime)
     update_player(lifetime)
