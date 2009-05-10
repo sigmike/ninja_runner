@@ -43,22 +43,28 @@ class Player
     @position.y %= @game.height
   end
   
+  def can_move?
+    x = (@position.x + next_move[0]) % @game.width
+    y = (@position.y + next_move[1]) % @game.height
+    @game.accessible?(x, y)
+  end
+  
   def start_moving(direction, lifetime)
     @direction = direction
-    #apply_direction
-    @movement_lifetime = lifetime
+    @last_movement_lifetime = nil
+    move(lifetime)
   end
 
   def stop_moving
     @direction = nil
-    @movement_lifetime = nil
+    @last_movement_lifetime = nil
   end
   
   def move(lifetime)
     if @direction
-      while lifetime >= @movement_lifetime + REPEAT_TIME
+      while (@last_movement_lifetime.nil? or lifetime >= @last_movement_lifetime + REPEAT_TIME) and can_move?
         apply_direction
-        @movement_lifetime += REPEAT_TIME
+        @last_movement_lifetime = lifetime
       end
     end
   end
@@ -262,7 +268,7 @@ class Game
   def accessible? x, y
     item = item(x, y)
     if item
-      item.kind != 'block'
+      item.kind != 'brick'
     else
       true
     end
@@ -288,16 +294,7 @@ class Game
   end
   
   def update_player(lifetime)
-    if @player.direction
-      next_x = @player.position.x + @player.next_move[0]
-      next_y = @player.position.y + @player.next_move[1]      
-      while lifetime >= @player.movement_lifetime + REPEAT_TIME && accessible?(next_x, next_y)
-        @player.apply_direction
-        @player.movement_lifetime += REPEAT_TIME
-        next_x = @player.position.x + @player.next_move[0]
-        next_y = @player.position.y + @player.next_move[1]
-      end
-    end
+    @player.move(lifetime)
   end
   
   def catch_item
@@ -392,6 +389,7 @@ class Game
   end
   
   def item(x, y)
+    raise "Invalid position: #{x},#{y}" if x < 0 or x >= @width or y < 0 or y >= @height
     @grid[x][y]
   end
 

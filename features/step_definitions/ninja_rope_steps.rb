@@ -17,7 +17,18 @@ def Rubygame.push_event(event)
   @events << event
 end
 
+class Rubygame::Clock
+  def initialize
+    @start = $test_lifetime
+  end
+  
+  def lifetime
+    $test_lifetime - @start
+  end
+end
+
 Before do
+  $test_lifetime = 0
   @game = Game.new
   @mouse_buttons = []
   flexmock(Rubygame::Music).should_receive(:load).and_return do
@@ -62,7 +73,8 @@ Given /^a scenario$/ do |scenario|
 end
 
 def game_update_at(time)
-  flexmock(@game.clock).should_receive(:lifetime).and_return(time.to_i).once
+  #flexmock(@game.clock).should_receive(:lifetime).and_return(time.to_i).once
+  $test_lifetime = time.to_i
   @game.update
 end
 
@@ -72,7 +84,7 @@ When /^the clock goes to (.+)$/ do |time|
 end
 
 Given /^an item is at (\d+),(\d+)$/  do |x, y|
-  item = Item.new @game.clock.lifetime, 'bonus'
+  item = Item.new $test_lifetime, 'bonus'
   @game.grid[x.to_i][y.to_i] = item
 end
 
@@ -208,7 +220,7 @@ Then /^the player position should be below (\d+),(\d+)$/ do |x,y|
 end
 
 Given /^a (\w+) at position (\d+),(\d+)$/ do |type,x,y|
-  item = Item.new @game.clock.lifetime, type
+  item = Item.new $test_lifetime, type
   @game.grid[x.to_i][y.to_i] = item
 end
 
