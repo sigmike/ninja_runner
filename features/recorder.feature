@@ -9,9 +9,9 @@ Scenario: Record multiple events while draging with the mouse
   And the mouse is moved to cell 2,1 at time 170
   And the mouse is moved to cell 3,1 at time 180
   When the mouse button is released at cell 3,1 and time 200
-  Then the event 0 is "100 1,1"
-  And the event 1 is "160 2,1"
-  And the event 2 is "180 3,1"
+  Then the event 0 is "100 1,1 bonus
+  And the event 1 is "160 2,1 bonus"
+  And the event 2 is "180 3,1 bonus"
   And there's no event 3
   Then a record item is at 1,1
   Then a record item is at 2,1

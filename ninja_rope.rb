@@ -19,20 +19,24 @@ class Rubygame::Rect
 end
 
 class Player
-  attr_accessor :position, :direction
+  attr_accessor :position, :direction, :movement_lifetime
   
   def initialize(game)
     @game = game
     @position = Rubygame::Rect.new(0, 0, 0, 0)
   end
-  
-  def apply_direction
-    d = {
+
+  def next_move
+    {
       :right => [1, 0],
       :left => [-1, 0],
       :up => [0, -1],
       :down => [0, 1],
     }[@direction]
+  end
+  
+  def apply_direction
+    d = next_move
     @position.x += d[0]
     @position.y += d[1]
     @position.x %= @game.width
@@ -41,40 +45,33 @@ class Player
   
   def start_moving(direction, lifetime)
     @direction = direction
-    apply_direction
+    #apply_direction
     @movement_lifetime = lifetime
   end
-  @font
+
   def stop_moving
     @direction = nil
     @movement_lifetime = nil
   end
-  
-  def move(lifetime)
-    if @direction
-      while lifetime >= @movement_lifetime + REPEAT_TIME
-        apply_direction
-        @movement_lifetime += REPEAT_TIME
-      end
-    end
-  end
 end
 
 class GameEvent
-  attr_accessor :time, :x, :y
-  def initialize(time, x, y)
+  attr_accessor :time, :x, :y, :kind
+  def initialize(time, x, y, kind)
     @time = time
     @x = x
     @y = y
+    @kind = kind
   end
 end
 
 class Item
-  attr_accessor :life
+  attr_accessor :life, :kind
   
-  def initialize birthtime
+  def initialize birthtime, kind
     @birthtime = birthtime
     @life = 255
+    @kind = kind
   end
   
   def update current_time
@@ -123,11 +120,12 @@ class Game
   
   def scenario=(scenario)
     @game_events = scenario.split("\n").map { |line|
-      if line =~ /(\d+) (\d+),(\d+)/
+      if line =~ /(\d+) (\d+),(\d+) (\w+)/
         time = $1.to_i
         x = $2.to_i
         y = $3.to_i
-        GameEvent.new(time, x, y)
+        type = $4
+        GameEvent.new(time, x, y, type)
       else
         raise "Invalid line: #{line.inspect}"
       end
@@ -229,28 +227,37 @@ class Game
           cell = [x, y]
           if cell != @last_mouse_cell
             @last_mouse_cell = cell
-            @record_grid[x][y] = Item.new lifetime
-            puts "#{lifetime} #{x},#{y}"
+            @record_grid[x][y] = Item.new lifetime, 'bonus'
+            puts "#{lifetime} #{x},#{y} bonus"
           end
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
         cell = [x, y]
-        @record_grid[x][y] = Item.new lifetime
-        puts "#{lifetime} #{x},#{y}"
+        @record_grid[x][y] = Item.new lifetime, 'bonus'
+        puts "#{lifetime} #{x},#{y} bonus"
       when Rubygame::QuitEvent
         @end = true
       end
     end
   end
-  
+
+  def accessible? x, y
+    item = item(x, y)
+    if item
+      item.kind != 'block'
+    else
+      true
+    end
+  end
+
   def process_game_events(lifetime)
     loop do
       break if @game_events.nil?
       break if @game_events.empty?
       break if @game_events.first.time > lifetime
       event = @game_events.shift
-      @grid[event.x][event.y] = Item.new event.time
+      @grid[event.x][event.y] = Item.new event.time, event.kind
     end
   end
   
@@ -264,7 +271,16 @@ class Game
   end
   
   def update_player(lifetime)
-    @player.move(lifetime)
+    if @player.direction
+      next_x = @player.position.x + @player.next_move[0]
+      next_y = @player.position.y + @player.next_move[1]      
+      while lifetime >= @player.movement_lifetime + REPEAT_TIME && accessible?(next_x, next_y)
+        @player.apply_direction
+        @player.movement_lifetime += REPEAT_TIME
+        next_x = @player.position.x + @player.next_move[0]
+        next_y = @player.position.y + @player.next_move[1]
+      end
+    end
   end
   
   def catch_item
@@ -317,8 +333,6 @@ class Game
     process_events(lifetime)
     process_game_events(lifetime)
     
-    
-
     update_grid(lifetime)
     update_record_grid(lifetime)
     update_player(lifetime)

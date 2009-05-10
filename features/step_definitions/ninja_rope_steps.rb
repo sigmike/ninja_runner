@@ -72,7 +72,7 @@ When /^the clock goes to (.+)$/ do |time|
 end
 
 Given /^an item is at (\d+),(\d+)$/  do |x, y|
-  item = Item.new @game.clock.lifetime
+  item = Item.new @game.clock.lifetime, 'bonus'
   @game.grid[x.to_i][y.to_i] = item
 end
 
@@ -206,3 +206,14 @@ end
 Then /^the player position should be below (\d+),(\d+)$/ do |x,y|
   @game.player.position.y.should > y.to_i
 end
+
+Given /^a (\w+) at position (\d+),(\d+)$/ do |type,x,y|
+  item = Item.new @game.clock.lifetime, type
+  @game.grid[x.to_i][y.to_i] = item
+end
+
+Then /^an item should be (\w+) at (\d+),(\d+)$/ do |type,x,y|
+  pending
+end
+
+

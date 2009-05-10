@@ -9,16 +9,16 @@ scenario = ""
 if ARGV.first
   scenario = File.read(ARGV.first)
 end
-game.scenario = scenario
+game.scenario =
   ((1..12).map { |x|
     (1..14).map { |y|
       timer += 100
-      "#{timer} #{x},#{y}"
+      "#{timer} #{x},#{y} brick"
     }
   } +
   (1..100).map { |i|
     timer += 100
-    "#{timer} #{rand 30},#{rand 25}"
+    "#{timer} #{rand 30},#{rand 25} brick"
   }).join("\n")
 game.music_enabled = true
 game.start
