@@ -53,6 +53,23 @@ class Player
     @direction = nil
     @movement_lifetime = nil
   end
+  
+  def move(lifetime)
+    if @direction
+      while lifetime >= @movement_lifetime + REPEAT_TIME
+        apply_direction
+        @movement_lifetime += REPEAT_TIME
+      end
+    end
+  end
+  
+  def x
+    @position.x
+  end
+  
+  def y
+    @position.y
+  end
 end
 
 class GameEvent
@@ -284,8 +301,8 @@ class Game
   end
   
   def catch_item
-    if item(@player.position.x, @player.position.y)
-       @grid[@player.position.x][@player.position.y] = nil
+    if item(@player.x, @player.y)
+       @grid[@player.x][@player.y] = nil
        @score += 10
     end
   end
