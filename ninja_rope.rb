@@ -19,11 +19,12 @@ class Rubygame::Rect
 end
 
 class Player
-  attr_accessor :position, :direction, :movement_lifetime
+  attr_accessor :position, :direction, :movement_lifetime, :target
   
   def initialize(game)
     @game = game
     @position = Rubygame::Rect.new(0, 0, 0, 0)
+    @target = Rubygame::Rect.new(0, 0, 0, 0)
   end
 
   def next_move
@@ -80,6 +81,7 @@ end
 
 class GameEvent
   attr_accessor :time, :x, :y, :kind
+
   def initialize(time, x, y, kind)
     @time = time
     @x = x

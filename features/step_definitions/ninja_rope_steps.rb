@@ -225,7 +225,26 @@ Given /^a (\w+) at position (\d+),(\d+)$/ do |type,x,y|
 end
 
 Then /^an item should be (\w+) at (\d+),(\d+)$/ do |type,x,y|
+  item = Item.new $test_lifetime, type
+  @game.grid[x.to_i][y.to_i] = item
+end
+
+Then /^the event 0 is "100 1,1 bonus$/ do
   pending
 end
 
+Then /^game can detect a block at (\d+),(\d+)$/ do |x,y|
+  item = Item.new $test_lifetime, 'block'
+  @game.grid[x.to_i][y.to_i] = item
+end
 
+Given /^the player is targeting a block at position (\d+),(\d+)$/ do |x,y|
+  @game.player.target.x = x
+  @game.player.target.y = y
+  item = Item.new $test_lifetime, 'block'
+  @game.grid[x.to_i][y.to_i] = item
+end
+
+When /^the up key is pressed up$/ do
+  pending
+end
