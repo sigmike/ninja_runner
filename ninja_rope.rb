@@ -5,6 +5,7 @@ require 'item'
 require 'game_event'
 
 Rubygame.init
+include Rubygame
 
 ITEM_LIFETIME = 2000
 REPEAT_TIME = 50
@@ -12,6 +13,8 @@ CELL_SIZE = 24
 GRAVITY = 1 # cell down per second
 
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
+
+Surface.autoload_dirs = [ 'gfx' ]
 
 class Game
   attr_accessor :player,
@@ -42,11 +45,6 @@ class Game
       @music = Rubygame::Music.load "music/2 - Please.mp3"
       @music.play
     end
-    
-    @media_bag = Rubygame::MediaBag.new
-    @media_bag.load_image "gfx/ninja.png"
-    @media_bag.load_image "gfx/bonus.png"
-    @media_bag.load_image "gfx/brick.png"
   end
   
   def music_playing?
@@ -176,7 +174,7 @@ class Game
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
-        cell = [x, y]
+        @cell_mouse_click = [x, y]
         if @record_enabled
           @record_grid[x][y] = Item.new lifetime, 'bonus'
           puts "#{lifetime} #{x},#{y} bonus"
@@ -285,6 +283,8 @@ class Game
     each_record_item do |x, y, item|
       draw_item(x, y, item)
     end
+    
+    #draw_rope
 
     draw_player
 
@@ -292,8 +292,18 @@ class Game
     @screen.update
   end
   
+  def draw_rope
+    position = @player.position.dup
+    while position != @cell_mouse_click
+      surface = Surface['rope.png'] 
+      position.x *= CELL_SIZE
+      position.y *= CELL_SIZE
+      surface.blit(@screen, position)
+    end
+  end
+  
   def draw_player
-    surface = @media_bag['gfx/ninja.png'].to_display
+    surface = Surface['ninja.png']
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE
@@ -301,7 +311,7 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = @media_bag['gfx/bonus.png'].to_display
+    surface = Surface['bonus.png']
     surface.set_alpha item.life
     surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
