@@ -225,8 +225,9 @@ class Game
   
   def catch_item
     if item(@player.x, @player.y)
+       item_kind = @grid[@player.x][@player.y].kind
+       @score += 10 if item_kind == 'bonus'
        @grid[@player.x][@player.y] = nil
-       @score += 10
     end
   end
   
@@ -237,6 +238,41 @@ class Game
       item.update lifetime
       unless item.alive?
         @record_grid[x][y] = nil
+      end
+    end
+  end
+  
+  def update_rope_postion
+    @rope_position = []
+    if @cell_mouse_click
+      accroch_point = Rubygame::Rect.new(@cell_mouse_click)
+      
+      position = accroch_point.dup
+
+      while position != @player.position
+        break if accessible?(accroch_point.x, accroch_point.y)
+      
+        new_position = position.dup
+        
+        if position.x < @player.position.x
+          new_position.x = accessible?(new_position.x + 1, new_position.y) ? new_position.x + 1 : new_position.x
+        elsif position.x > @player.position.x
+          new_position.x = accessible?(new_position.x - 1, new_position.y) ? new_position.x - 1 : new_position.x
+        end
+        
+        if position.y < @player.position.y
+          new_position.y = accessible?(new_position.x, new_position.y + 1) ? new_position.y + 1 : new_position.y
+        elsif position.y > @player.position.y
+          new_position.y = accessible?(new_position.x, new_position.y - 1) ? new_position.y - 1 : new_position.y
+        end
+        
+        if position != new_position
+          position = new_position
+        else
+          @cell_mouse_click = nil
+          break
+        end
+        @rope_position << position.dup
       end
     end
   end
@@ -260,11 +296,13 @@ class Game
     @screen.fill([0,0,0])
   
     lifetime = @clock.lifetime
-    
-    apply_gravity(lifetime)
+
     process_events(lifetime)
     process_game_events(lifetime)
     
+    update_rope_postion
+    apply_gravity(lifetime)
+        
     update_grid(lifetime)
     update_record_grid(lifetime)
     update_player(lifetime)
@@ -278,15 +316,14 @@ class Game
     each_item do |x, y, item|
       draw_item(x, y, item)
     end
+    
     each_record_item do |x, y, item|
       draw_item(x, y, item)
     end
 
-    each_record_item do |x, y, item|
-      draw_item(x, y, item)
+    @rope_position.each do |position|
+      draw_rope(position)
     end
-    
-    draw_rope
 
     draw_player
 
@@ -294,43 +331,12 @@ class Game
     @screen.update
   end
   
-  def draw_rope
-    if @cell_mouse_click
-      accroch_point = Rubygame::Rect.new(@cell_mouse_click)
-      
-      position = accroch_point.dup
-
-      while position != @player.position
-        break if accessible?(accroch_point.x, accroch_point.y)
-      
-        surface = Surface['rope.png']
-        to_blit_position = position.dup
-        to_blit_position.x *= CELL_SIZE
-        to_blit_position.y *= CELL_SIZE
-        surface.blit(@screen, to_blit_position)
-        
-        new_position = position.dup
-        
-        if position.x < @player.position.x
-          new_position.x = accessible?(new_position.x + 1, new_position.y) ? new_position.x + 1 : new_position.x
-        elsif position.x > @player.position.x
-          new_position.x = accessible?(new_position.x - 1, new_position.y) ? new_position.x - 1 : new_position.x
-        end
-        
-        if position.y < @player.position.y
-          new_position.y = accessible?(new_position.x, new_position.y + 1) ? new_position.y + 1 : new_position.y
-        elsif position.y > @player.position.y
-          new_position.y = accessible?(new_position.x, new_position.y - 1) ? new_position.y - 1 : new_position.y
-        end
-        
-        if position != new_position
-          position = new_position
-        else
-          @cell_mouse_click = nil
-          break
-        end
-      end
-    end
+  def draw_rope(position)
+    surface = Surface['rope.png']
+    to_blit_position = position.dup
+    to_blit_position.x *= CELL_SIZE
+    to_blit_position.y *= CELL_SIZE
+    surface.blit(@screen, to_blit_position)
   end
   
   def draw_player

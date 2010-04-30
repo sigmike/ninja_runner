@@ -3,7 +3,7 @@
 / définir les zones accrochables
 - avoir une rope qui évolue correctement
 -/ se décroche si la brick disparait
--- fait le tour des biques
+-/ se casse sur les briques
 - adapter la gravité quand on a déployé la rope
 - pouvoir se décrocher de la rope
 - pouvoir monter et decendre sur la rope
