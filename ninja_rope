@@ -5,24 +5,25 @@ require 'ninja_rope'
 
 game = Game.new
 timer = 0
-scenario = ""
 
 # construction du scénario
 if ARGV.first
   scenario = File.read(ARGV.first)
-end
-
-game.scenario =
-  ((1..12).map { |x|
-    (1..14).map { |y|
+  puts scenario.split("\n")
+  game.scenario = scenario
+else
+  game.scenario =
+    ((1..12).map { |x|
+      (1..14).map { |y|
+        timer += 100
+        "#{timer} #{x},#{y} brick"
+      }
+    } +
+    (1..100).map { |i|
       timer += 100
-      "#{timer} #{x},#{y} brick"
-    }
-  } +
-  (1..100).map { |i|
-    timer += 100
-    "#{timer} #{rand 30},#{rand 25} brick"
-  }).join("\n")
+      "#{timer} #{rand 30},#{rand 25} brick"
+    }).join("\n")
+end
   
 game.music_enabled = false
 game.record_enabled = false

@@ -1,13 +1,3 @@
-Warning: Function 'SDL_gfxBlitRGBA' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'SDL_gfxSetAlpha' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'arcColor' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'arcRGBA' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'texturedPolygon' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'filledPolygonColorMT' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'filledPolygonRGBAMT' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'texturedPolygonMT' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'shrinkSurface' not found in [/usr/lib/libSDL_gfx.so]
-Warning: Function 'rotateSurface90Degrees' not found in [/usr/lib/libSDL_gfx.so]
 399 22,8 bonus
 1629 21,8 bonus
 1629 21,9 bonus
