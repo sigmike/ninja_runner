@@ -297,10 +297,12 @@ class Game
   def draw_rope
     if @cell_mouse_click
       accroch_point = Rubygame::Rect.new(@cell_mouse_click)
+      
       position = @player.position.dup
 
       while position != accroch_point
-
+        break if accessible?(accroch_point.x, accroch_point.y)
+      
         surface = Surface['rope.png']
         to_blit_position = position.dup
         to_blit_position.x *= CELL_SIZE
