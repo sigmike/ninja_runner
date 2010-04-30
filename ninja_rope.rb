@@ -14,7 +14,15 @@ GRAVITY = 1 # cell down per second
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
 
 class Game
-  attr_accessor :player, :screen, :scenario, :clock, :grid, :music_enabled, :score
+  attr_accessor :player,
+    :screen,
+    :scenario,
+    :clock,
+    :grid,
+    :music_enabled,
+    :score,
+    :record_enabled
+    
   attr_reader :width, :height
   
   def start
@@ -160,15 +168,19 @@ class Game
           cell = [x, y]
           if cell != @last_mouse_cell
             @last_mouse_cell = cell
-            @record_grid[x][y] = Item.new lifetime, 'bonus'
-            puts "#{lifetime} #{x},#{y} bonus"
+            if @record_enabled
+              @record_grid[x][y] = Item.new lifetime, 'bonus'
+              puts "#{lifetime} #{x},#{y} bonus"
+            end
           end
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
         cell = [x, y]
-        @record_grid[x][y] = Item.new lifetime, 'bonus'
-        puts "#{lifetime} #{x},#{y} bonus"
+        if @record_enabled
+          @record_grid[x][y] = Item.new lifetime, 'bonus'
+          puts "#{lifetime} #{x},#{y} bonus"
+        end
       when Rubygame::QuitEvent
         @end = true
       end

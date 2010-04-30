@@ -10,4 +10,3 @@ Scenario: The music is started when music is disabled
   When the game is started
   Then the music should not be playing
 
-  
