@@ -6,9 +6,12 @@ require 'ninja_rope'
 game = Game.new
 timer = 0
 scenario = ""
+
+# construction du scénario
 if ARGV.first
-  scenario = File.read(ARGV.first)
+  scenario = File.read(ARGV.firAUTOFEATURE=truest)
 end
+
 game.scenario =
   ((1..12).map { |x|
     (1..14).map { |y|
@@ -20,7 +23,10 @@ game.scenario =
     timer += 100
     "#{timer} #{rand 30},#{rand 25} brick"
   }).join("\n")
+  
 game.music_enabled = false
+
+# boucle principale
 game.start
 while not game.end?
   game.update

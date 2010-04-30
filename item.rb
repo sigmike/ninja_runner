@@ -1,3 +1,5 @@
+# item est tout ce qui peut avoir un interaction avec Player
+
 class Item
   attr_accessor :life, :kind
   

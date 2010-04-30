@@ -29,10 +29,12 @@ class Game
     @grid = Array.new(@width) { Array.new(@height) }
     @record_grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([@width * CELL_SIZE, @height * CELL_SIZE])
+    
     if @music_enabled
       @music = Rubygame::Music.load "music/2 - Please.mp3"
       @music.play
     end
+    
     @media_bag = Rubygame::MediaBag.new
     @media_bag.load_image "gfx/ninja.png"
     @media_bag.load_image "gfx/bonus.png"

@@ -14,4 +14,5 @@ Feature: The player is affected by the gravity
   
   Examples:
     |  5,23   | 5,0         |
+    
 

@@ -8,6 +8,8 @@ class Rubygame::Rect
   end
 end
 
+# Player représente le joueur dans le jeu
+
 class Player
   attr_accessor :position, :direction, :movement_lifetime, :target
   
@@ -17,6 +19,8 @@ class Player
     @target = Rubygame::Rect.new(0, 0, 0, 0)
   end
 
+  # détermine le déplacement en fonction de la direction
+  
   def next_move
     {
       :right => [1, 0],
@@ -26,6 +30,8 @@ class Player
     }[@direction]
   end
   
+  # applique la direction pour une case
+  
   def apply_direction
     d = next_move
     @position.x += d[0]
@@ -34,28 +40,36 @@ class Player
     @position.y %= @game.height
   end
   
+  # demande au jeu si la case est accéssible
+  
   def can_move?
     x = (@position.x + next_move[0]) % @game.width
     y = (@position.y + next_move[1]) % @game.height
     @game.accessible?(x, y)
   end
   
+  # indique une direction
+  
   def start_moving(direction, lifetime)
     @direction = direction
     @last_movement_lifetime = nil
     move(lifetime)
   end
+  
+  # enlève la direction
 
   def stop_moving
     @direction = nil
     @last_movement_lifetime = nil
   end
   
+  # applique la direction en cours en passant par toutes les positions
+  
   def move(lifetime)
     if @direction
       while (@last_movement_lifetime.nil? or lifetime >= @last_movement_lifetime + REPEAT_TIME) and can_move?
         apply_direction
-        @last_movement_lifetime = lifetime
+        @last_movement_lifetime = lifetime # Que se passe-t-il si on ne peut pas aller sur la case ?
       end
     end
   end

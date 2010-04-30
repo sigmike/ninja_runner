@@ -1,3 +1,5 @@
+# GameEvent contient un évenement temporel dans le scénario
+
 class GameEvent
   attr_accessor :time, :x, :y, :kind
 
