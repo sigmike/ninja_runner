@@ -10,7 +10,7 @@ include Rubygame
 ITEM_LIFETIME = 6000
 REPEAT_TIME = 50
 CELL_SIZE = 24
-GRAVITY = 1 # cell down per second
+GRAVITY = 5 # cell down per second
 
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
 
@@ -242,15 +242,18 @@ class Game
     end
   end
   
-  def update_rope_postion
-    @rope_position = []
+  def update_rope_path
+    @rope_path = []
     if @cell_mouse_click
       accroch_point = Rubygame::Rect.new(@cell_mouse_click)
       
       position = accroch_point.dup
 
       while position != @player.position
-        break if accessible?(accroch_point.x, accroch_point.y)
+        if accessible?(accroch_point.x, accroch_point.y)
+          @cell_mouse_click = nil
+          break
+        end
       
         new_position = position.dup
         
@@ -272,8 +275,32 @@ class Game
           @cell_mouse_click = nil
           break
         end
-        @rope_position << position.dup
+        @rope_path << position.dup
       end
+    end
+  end
+  
+  def rope_active?
+    @cell_mouse_click
+  end
+  
+  def rope_max_down?
+    if rope_active?
+      result = true
+      begin
+        first_x = @rope_path[0].x
+      rescue
+        pp @rope_path
+      end
+      @rope_path.each do |position|
+        if position.x != first_x
+          result = nil
+          break
+        end
+      end
+      result
+    else
+      nil
     end
   end
 
@@ -281,7 +308,7 @@ class Game
   
   def apply_gravity lifetime
     while lifetime - @last_down_time > MILLISECONDS_PER_CELL
-
+      break if rope_max_down?
       old_player_direction = @player.direction
       
       @player.direction = :down
@@ -300,8 +327,9 @@ class Game
     process_events(lifetime)
     process_game_events(lifetime)
     
-    update_rope_postion
+    update_rope_path
     apply_gravity(lifetime)
+    update_rope_path
         
     update_grid(lifetime)
     update_record_grid(lifetime)
@@ -321,7 +349,7 @@ class Game
       draw_item(x, y, item)
     end
 
-    @rope_position.each do |position|
+    @rope_path.each do |position|
       draw_rope(position)
     end
 
