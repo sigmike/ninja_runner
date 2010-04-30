@@ -229,7 +229,7 @@ Then /^an item should be (\w+) at (\d+),(\d+)$/ do |type,x,y|
   @game.grid[x.to_i][y.to_i] = item
 end
 
-Then /^the event 0 is "100 1,1 bonus$/ do
+Then /^the event 0 is "100 1,1 bonus"$/ do
   pending
 end
 

@@ -174,10 +174,12 @@ class Game
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
-        @cell_mouse_click = [x, y, 0, 0]
-        if @record_enabled
-          @record_grid[x][y] = Item.new lifetime, 'bonus'
-          puts "#{lifetime} #{x},#{y} bonus"
+        if !accessible?(x, y)
+          @cell_mouse_click = [x, y, 0, 0]
+          if @record_enabled
+            @record_grid[x][y] = Item.new lifetime, 'bonus'
+            puts "#{lifetime} #{x},#{y} bonus"
+          end
         end
       when Rubygame::QuitEvent
         @end = true

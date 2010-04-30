@@ -1,6 +1,6 @@
 # la ninja rope
-- creer visuellement la rope entre le joueur et le clique
-- définir les zones accrochables
+/ creer visuellement la rope entre le joueur et le clique
+/ définir les zones accrochables
 - avoir une rope qui évolue correctement
 - adapter la gravité quand on a déployé la rope
 - pouvoir se décrocher de la rope
