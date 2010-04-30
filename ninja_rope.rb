@@ -242,10 +242,17 @@ class Game
     end
   end
   
+  def accroch_point
+    if @cell_mouse_click
+      Rubygame::Rect.new(@cell_mouse_click)
+    else
+      nil
+    end
+  end
+  
   def update_rope_path
     @rope_path = []
-    if @cell_mouse_click
-      accroch_point = Rubygame::Rect.new(@cell_mouse_click)
+    if accroch_point
       
       position = accroch_point.dup
 
@@ -287,11 +294,7 @@ class Game
   def rope_max_down?
     if rope_active?
       result = true
-      begin
-        first_x = @rope_path[0].x
-      rescue
-        pp @rope_path
-      end
+      first_x = @rope_path.first.x
       @rope_path.each do |position|
         if position.x != first_x
           result = nil
@@ -303,18 +306,33 @@ class Game
       nil
     end
   end
+  
+  def accroch_point_at_left?
+    @player.position.x > accroch_point.x
+  end
 
   # fait tomber le joueur
   
   def apply_gravity lifetime
     while lifetime - @last_down_time > MILLISECONDS_PER_CELL
-      break if rope_max_down?
       old_player_direction = @player.direction
+      
+      if rope_active?
+        @player.direction = accroch_point_at_left? ? :left : :right
+        @player.apply_direction if @player.can_move?
+      end
+      
+      if rope_max_down?
+        @player.direction = old_player_direction
+        @last_down_time = lifetime
+        break
+      end
       
       @player.direction = :down
       @player.apply_direction if @player.can_move?
-      @player.direction = old_player_direction
       
+      @player.direction = old_player_direction
+        
       @last_down_time += MILLISECONDS_PER_CELL
     end
   end

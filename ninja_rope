@@ -13,6 +13,12 @@ if ARGV.first
   game.scenario = scenario
 else
   game.scenario =
+    (1..200).map { |i|
+      timer += 100
+      kind = 'brick'
+      "#{timer} 10,10 #{kind}"
+    }.join("\n")
+=begin
     ((1..12).map { |x|
       (1..14).map { |y|
         timer += 100
@@ -25,6 +31,7 @@ else
       kind = rand(2) == 1 ? 'brick' : 'bonus'
       "#{timer} #{rand 30},#{rand 25} #{kind}"
     }).join("\n")
+=end
 end
   
 # options de lancement
