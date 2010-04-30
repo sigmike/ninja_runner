@@ -311,7 +311,7 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = Surface['bonus.png']
+    surface = Surface["#{item.kind}.png"]
     surface.set_alpha item.life
     surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end

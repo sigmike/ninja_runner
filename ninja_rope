@@ -16,12 +16,14 @@ else
     ((1..12).map { |x|
       (1..14).map { |y|
         timer += 100
-        "#{timer} #{x},#{y} brick"
+        kind = rand(2) == 1 ? 'brick' : 'bonus'
+        "#{timer} #{x},#{y} #{kind}"
       }
     } +
     (1..100).map { |i|
       timer += 100
-      "#{timer} #{rand 30},#{rand 25} brick"
+      kind = rand(2) == 1 ? 'brick' : 'bonus'
+      "#{timer} #{rand 30},#{rand 25} #{kind}"
     }).join("\n")
 end
   
@@ -34,3 +36,4 @@ game.start
 while not game.end?
   game.update
 end
+
