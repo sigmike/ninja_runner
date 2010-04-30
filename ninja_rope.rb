@@ -7,7 +7,7 @@ require 'pp'
 Rubygame.init
 include Rubygame
 
-ITEM_LIFETIME = 2000
+ITEM_LIFETIME = 6000
 REPEAT_TIME = 50
 CELL_SIZE = 24
 GRAVITY = 1 # cell down per second
@@ -298,9 +298,9 @@ class Game
     if @cell_mouse_click
       accroch_point = Rubygame::Rect.new(@cell_mouse_click)
       
-      position = @player.position.dup
+      position = accroch_point.dup
 
-      while position != accroch_point
+      while position != @player.position
         break if accessible?(accroch_point.x, accroch_point.y)
       
         surface = Surface['rope.png']
@@ -309,16 +309,25 @@ class Game
         to_blit_position.y *= CELL_SIZE
         surface.blit(@screen, to_blit_position)
         
-        if position.x < accroch_point.x
-          position.x += 1
-        elsif position.x > accroch_point.x
-          position.x -= 1
+        new_position = position.dup
+        
+        if position.x < @player.position.x
+          new_position.x = accessible?(new_position.x + 1, new_position.y) ? new_position.x + 1 : new_position.x
+        elsif position.x > @player.position.x
+          new_position.x = accessible?(new_position.x - 1, new_position.y) ? new_position.x - 1 : new_position.x
         end
         
-        if position.y < accroch_point.y
-          position.y += 1
-        elsif position.y > accroch_point.y
-          position.y -= 1
+        if position.y < @player.position.y
+          new_position.y = accessible?(new_position.x, new_position.y + 1) ? new_position.y + 1 : new_position.y
+        elsif position.y > @player.position.y
+          new_position.y = accessible?(new_position.x, new_position.y - 1) ? new_position.y - 1 : new_position.y
+        end
+        
+        if position != new_position
+          position = new_position
+        else
+          @cell_mouse_click = nil
+          break
         end
       end
     end
