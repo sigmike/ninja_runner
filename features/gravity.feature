@@ -13,6 +13,7 @@ Feature: The player is affected by the gravity
     Then the player position should be below  <destination>
   
   Examples:
+    | initial | destination |
     |  5,23   | 5,0         |
-    
+    |  5,23   | 6,0         |
 

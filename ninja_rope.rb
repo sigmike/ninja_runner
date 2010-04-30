@@ -136,6 +136,8 @@ class Game
     end
   end
   
+  # applique les évènements de l'utilisateur
+  
   def process_events(lifetime)
     events = Rubygame.fetch_sdl_events
     events.each do |event|
@@ -181,6 +183,8 @@ class Game
       true
     end
   end
+  
+  # lit le scénario
 
   def process_game_events(lifetime)
     loop do
@@ -191,6 +195,8 @@ class Game
       @grid[event.x][event.y] = Item.new event.time, event.kind
     end
   end
+  
+  # vérifie la durée de vie des items
   
   def update_grid(lifetime)
     each_item do |x, y, item|
@@ -211,6 +217,8 @@ class Game
        @score += 10
     end
   end
+  
+  # vérifie la durée de vie des items nouvellements enregistrés
 
   def update_record_grid(lifetime)
     each_record_item do |x, y, item|
@@ -221,27 +229,17 @@ class Game
     end
   end
 
-  def update_record_grid(lifetime)
-    each_record_item do |x, y, item|
-      item.update lifetime
-      unless item.alive?
-        @record_grid[x][y] = nil
-      end
-    end
-  end
-
-  def update_record_grid(lifetime)
-    each_record_item do |x, y, item|
-      item.update lifetime
-      unless item.alive?
-        @record_grid[x][y] = nil
-      end
-    end
-  end
-
+  # fait tomber le joueur
+  
   def apply_gravity lifetime
     while lifetime - @last_down_time > MILLISECONDS_PER_CELL
-      @player.position.y += 1
+
+      old_player_direction = @player.direction
+      
+      @player.direction = :down
+      @player.apply_direction if @player.can_move?
+      @player.direction = old_player_direction
+      
       @last_down_time += MILLISECONDS_PER_CELL
     end
   end

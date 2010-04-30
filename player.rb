@@ -29,7 +29,7 @@ class Player
       :down => [0, 1],
     }[@direction]
   end
-  
+    
   # applique la direction pour une case
   
   def apply_direction

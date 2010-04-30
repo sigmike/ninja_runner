@@ -9,7 +9,7 @@ scenario = ""
 
 # construction du scénario
 if ARGV.first
-  scenario = File.read(ARGV.firAUTOFEATURE=truest)
+  scenario = File.read(ARGV.first)
 end
 
 game.scenario =
