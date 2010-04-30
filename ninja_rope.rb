@@ -1,8 +1,8 @@
 require 'rubygame'
-require 'rubygame/mediabag'
 require 'player'
 require 'item'
 require 'game_event'
+require 'pp'
 
 Rubygame.init
 include Rubygame
@@ -174,7 +174,7 @@ class Game
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
-        @cell_mouse_click = [x, y]
+        @cell_mouse_click = [x, y, 0, 0]
         if @record_enabled
           @record_grid[x][y] = Item.new lifetime, 'bonus'
           puts "#{lifetime} #{x},#{y} bonus"
@@ -284,7 +284,7 @@ class Game
       draw_item(x, y, item)
     end
     
-    #draw_rope
+    draw_rope
 
     draw_player
 
@@ -293,12 +293,30 @@ class Game
   end
   
   def draw_rope
-    position = @player.position.dup
-    while position != @cell_mouse_click
-      surface = Surface['rope.png'] 
-      position.x *= CELL_SIZE
-      position.y *= CELL_SIZE
-      surface.blit(@screen, position)
+    if @cell_mouse_click
+      accroch_point = Rubygame::Rect.new(@cell_mouse_click)
+      position = @player.position.dup
+
+      while position != accroch_point
+
+        surface = Surface['rope.png']
+        to_blit_position = position.dup
+        to_blit_position.x *= CELL_SIZE
+        to_blit_position.y *= CELL_SIZE
+        surface.blit(@screen, to_blit_position)
+        
+        if position.x < accroch_point.x
+          position.x += 1
+        elsif position.x > accroch_point.x
+          position.x -= 1
+        end
+        
+        if position.y < accroch_point.y
+          position.y += 1
+        elsif position.y > accroch_point.y
+          position.y -= 1
+        end
+      end
     end
   end
   
