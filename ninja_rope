@@ -20,7 +20,7 @@ game.scenario =
     timer += 100
     "#{timer} #{rand 30},#{rand 25} brick"
   }).join("\n")
-game.music_enabled = true
+game.music_enabled = false
 game.start
 while not game.end?
   game.update
