@@ -25,6 +25,7 @@ else
     }).join("\n")
 end
   
+# options de lancement
 game.music_enabled = false
 game.record_enabled = false
 
