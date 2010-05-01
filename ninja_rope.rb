@@ -349,7 +349,8 @@ class Game
   end
   
   def draw_player
-    surface = Surface['ninja.png']
+    png = @player.direction == :left ? 'ninja_left.png' : 'ninja_right.png'
+    surface = Surface[png]
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE

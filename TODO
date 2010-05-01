@@ -7,8 +7,8 @@
 -/ adapter la gravité quand on a déployé la rope
 -/ pouvoir se décrocher de la rope
 -/ pouvoir monter et decendre sur la rope
-- définir une longueur max
-- pouvoir se balancer
+-/ définir une longueur max
+-/ pouvoir se balancer
 
 # améliorer les gfx
 
