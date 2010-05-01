@@ -24,7 +24,8 @@ class Game
     :grid,
     :music_enabled,
     :score,
-    :record_enabled
+    :record_enabled,
+    :rope_path
     
   attr_reader :width, :height
   
@@ -194,6 +195,8 @@ class Game
     end
   end
 
+  # indique si une case peut être parcourue par le joueur
+  
   def accessible? x, y
     item = item(x, y)
     if item
@@ -317,10 +320,14 @@ class Game
   def accroch_point_at_left?
     @player.position.x > accroch_point.x
   end
+  
+  def accroch_point_at_top?
+    @player.position.y > accroch_point.y
+  end
 
   # fait tomber le joueur
   
-  def apply_gravity lifetime
+  def apply_gravity_with_rope_contraint lifetime
     if rope_max_down?
       @last_down_time = lifetime
     else
@@ -328,9 +335,9 @@ class Game
       while lifetime - @last_down_time > MILLISECONDS_PER_CELL
         old_player_direction = @player.direction
         
-        if rope_active?
+        if rope_active? && accroch_point_at_top?
           @player.direction = accroch_point_at_left? ? :left : :right
-          @player.apply_direction if @player.can_move?
+          @player.apply_direction(false) if @player.can_move?
         end
         
         if rope_max_down?
@@ -340,7 +347,7 @@ class Game
         end
         
         @player.direction = :down
-        @player.apply_direction if @player.can_move?
+        @player.apply_direction(false) if @player.can_move?
 
         @player.direction = old_player_direction
 
@@ -358,7 +365,7 @@ class Game
     process_game_events(lifetime)
     
     update_rope_path
-    apply_gravity(lifetime)
+    apply_gravity_with_rope_contraint(lifetime)
     update_rope_path
         
     update_grid(lifetime)

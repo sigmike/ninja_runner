@@ -32,10 +32,11 @@ class Player
     
   # applique la direction pour une case
   
-  def apply_direction
+  def apply_direction(with_rope_effect = true)
+    r = with_rope_effect ? rope_effect_up : 0
     d = next_move
     @position.x += d[0]
-    @position.y += d[1]
+    @position.y += d[1] + r
     @position.x %= @game.width
     @position.y %= @game.height
   end
@@ -44,8 +45,17 @@ class Player
   
   def can_move?
     x = (@position.x + next_move[0]) % @game.width
-    y = (@position.y + next_move[1]) % @game.height
+    y = (@position.y + next_move[1] + rope_effect_up) % @game.height
+
     @game.accessible?(x, y)
+  end
+  
+  def rope_effect_up
+    rope_effect_up = 0
+    if @game.rope_active? && @direction != :up && @direction != :down
+      rope_effect_up = @game.accroch_point_at_top? ? 1 : -1
+    end
+    rope_effect_up
   end
   
   # indique une direction
