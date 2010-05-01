@@ -57,6 +57,7 @@ class Game
     @media_bag.load_image "gfx/bonus.png"
     @media_bag.load_image "gfx/brick.png"
     @media_bag.load_image "gfx/rope.png"
+    @media_bag.load_image "gfx/background.png" #960 x 476
 
   end
   
@@ -351,6 +352,18 @@ class Game
   end
   
   def draw lifetime
+    draw_background
+  
+    score_offset_x = rand(6) - 3
+    score_offset_y = rand(6) - 3
+     @font.render('time: ' + lifetime.to_s, false, [79, 48, 11]).blit(@screen, [100, 25])
+    @font.render('time: ' + lifetime.to_s, false, [37, 34, 29]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
+    
+     @font.render(score.to_s + ' points', true, [238, 154, 44]).blit(@screen, [770, 25])
+    
+    @font.render(score.to_s + ' points', true, [241, 225, 53]).blit(@screen, [770 + score_offset_x, 25 + score_offset_y])
+    
+    
     each_item do |x, y, item|
       draw_item(x, y, item)
     end
@@ -369,14 +382,9 @@ class Game
 
     draw_player
     
-    @font.render(score.to_s + ' points', true, [238, 154, 44]).blit(@screen, [770, 25])
-    score_offset_x = rand(6) - 3
-    score_offset_y = rand(6) - 3
-    @font.render(score.to_s + ' points', true, [241, 225, 53]).blit(@screen, [770 + score_offset_x, 25 + score_offset_y])
+   
     
-    
-    @font.render('time: ' + lifetime.to_s, false, [79, 48, 11]).blit(@screen, [100, 25])
-    @font.render('time: ' + lifetime.to_s, false, [37, 34, 29]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
+
     @screen.update
   end
   
@@ -394,9 +402,14 @@ class Game
     surface.blit(@screen, to_blit_position)
   end
   
+  def draw_background
+    surface = @media_bag["gfx/background.png"].to_display
+    surface.blit(@screen, [0, 0])
+  end
+  
   def draw_player
     png = @player.direction == :left ? 'ninja_left' : 'ninja_right'
-    surface = @media_bag["gfx/#{png}.png"].to_display
+    surface = @media_bag["gfx/#{png}.png"].to_display_alpha
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE
@@ -404,9 +417,9 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = @media_bag["gfx/#{item.kind}.png"].to_display
+    surface = @media_bag["gfx/#{item.kind}.png"]
     surface.alpha= item.life
-    surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
+    surface.to_display_alpha.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
   
   def item(x, y)

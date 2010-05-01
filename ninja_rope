@@ -37,7 +37,7 @@ else
 end
   
 # options de lancement
-game.music_enabled = false
+game.music_enabled = true
 game.record_enabled = false
 
 # boucle principale
