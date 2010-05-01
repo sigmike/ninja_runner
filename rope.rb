@@ -4,9 +4,8 @@ class Rope
 
   attr_accessor :path
   
-  def initialize(game, player)
+  def initialize(game)
     @game = game
-    @player = player
   end
   
   def accroch point
@@ -14,11 +13,11 @@ class Rope
   end
   
   def accroch_point_at_left?
-    @player.position.x > @accroch_point.x
+    @game.player.position.x > @accroch_point.x
   end
   
   def accroch_point_at_top?
-    @player.position.y > @accroch_point.y
+    @game.player.position.y > @accroch_point.y
   end
   
   def active?
@@ -51,7 +50,7 @@ class Rope
       
       position = @accroch_point.dup
 
-      while position != @player.position
+      while position != @game.player.position
         if @game.accessible?(@accroch_point.x, @accroch_point.y)
           deccroch
           break
@@ -59,15 +58,15 @@ class Rope
       
         new_position = position.dup
         
-        if position.x < @player.position.x
+        if position.x < @game.player.position.x
           new_position.x = @game.accessible?(new_position.x + 1, new_position.y) ? new_position.x + 1 : new_position.x
-        elsif position.x > @player.position.x
+        elsif position.x > @game.player.position.x
           new_position.x = @game.accessible?(new_position.x - 1, new_position.y) ? new_position.x - 1 : new_position.x
         end
         
-        if position.y < @player.position.y
+        if position.y < @game.player.position.y
           new_position.y = @game.accessible?(new_position.x, new_position.y + 1) ? new_position.y + 1 : new_position.y
-        elsif position.y > @player.position.y
+        elsif position.y > @game.player.position.y
           new_position.y = @game.accessible?(new_position.x, new_position.y - 1) ? new_position.y - 1 : new_position.y
         end
         

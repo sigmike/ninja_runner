@@ -32,10 +32,10 @@ class Game
   
   def start
     @player = Player.new(self)
-    @rope = Rope.new(self, @player)
+    @rope = Rope.new(self)
     @clock = Rubygame::Clock.new
     Rubygame::TTF.setup
-    @font = Rubygame::TTF.new 'fonts/arial.ttf', 23
+    @font = Rubygame::TTF.new 'fonts/arial.ttf', 32
     @width = 40
     @height = 24
     @score = 0
@@ -335,8 +335,11 @@ class Game
     end
 
     draw_player
-
-    @font.render(score.to_s, true, [255, 255, 255]).blit(@screen, [100, 25])
+    
+    @font.render(score.to_s, true, [238, 154, 44]).blit(@screen, [100, 25])
+    score_offset_x = rand(6) - 3
+    score_offset_y = rand(6) - 3
+    @font.render(score.to_s, true, [241, 225, 53]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
     @screen.update
   end
   
