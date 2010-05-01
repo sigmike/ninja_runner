@@ -13,12 +13,14 @@ if ARGV.first
   game.scenario = scenario
 else
   game.scenario =
+# scénario qui ne contient qu'une brique
     (1..200).map { |i|
       timer += 100
       kind = 'brick'
       "#{timer} 10,10 #{kind}"
     }.join("\n")
 =begin
+# scenario assez alléatoire
     ((1..12).map { |x|
       (1..14).map { |y|
         timer += 100

@@ -174,12 +174,19 @@ class Game
         end
       when Rubygame::MouseDownEvent
         x, y = event.pos.map { |n| n / CELL_SIZE }
-        if !accessible?(x, y)
-          @cell_mouse_click = [x, y, 0, 0]
-          if @record_enabled
-            @record_grid[x][y] = Item.new lifetime, 'bonus'
-            puts "#{lifetime} #{x},#{y} bonus"
-          end
+        case event.button
+          when Rubygame::MOUSE_LEFT:
+            if !accessible?(x, y)
+              # accroche la rope
+              @cell_mouse_click = [x, y, 0, 0]
+              if @record_enabled
+                @record_grid[x][y] = Item.new lifetime, 'bonus'
+                puts "#{lifetime} #{x},#{y} bonus"
+              end
+            end
+          when Rubygame::MOUSE_RIGHT
+            # décroche la rope
+            @cell_mouse_click = nil
         end
       when Rubygame::QuitEvent
         @end = true
