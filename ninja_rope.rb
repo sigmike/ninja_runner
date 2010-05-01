@@ -417,7 +417,7 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = @media_bag["gfx/#{item.kind}.png"]
+    surface = @media_bag["gfx/#{item.kind}.png"].to_display
     surface.alpha= item.life
     surface.to_display_alpha.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
