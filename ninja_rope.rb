@@ -3,6 +3,7 @@ require 'player'
 require 'item'
 require 'game_event'
 require 'rope'
+require 'rubygame/mediabag'
 require 'pp'
 
 Rubygame.init
@@ -49,6 +50,14 @@ class Game
       @music = Rubygame::Music.load "music/2 - Please.mp3"
       @music.play
     end
+    
+    @media_bag = Rubygame::MediaBag.new
+    @media_bag.load_image "gfx/ninja_left.png"
+    @media_bag.load_image "gfx/ninja_right.png"
+    @media_bag.load_image "gfx/bonus.png"
+    @media_bag.load_image "gfx/brick.png"
+    @media_bag.load_image "gfx/rope.png"
+
   end
   
   def music_playing?
@@ -360,7 +369,7 @@ class Game
 
     draw_player
     
-    @font.render(score.to_s, true, [238, 154, 44], [42, 44, 46]).blit(@screen, [100, 25])
+    @font.render(score.to_s, true, [238, 154, 44]).blit(@screen, [100, 25])
     score_offset_x = rand(6) - 3
     score_offset_y = rand(6) - 3
     @font.render(score.to_s, true, [241, 225, 53]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
@@ -368,15 +377,13 @@ class Game
   end
   
   def draw_catched_item(item)
-    #surface = Surface["#{item.kind}.png"]
-    #surface.set_alpha item.life
-    #surface.blit(@screen, [ item.x * CELL_SIZE, (item.y + (item.life / CELL_SIZE )) * CELL_SIZE])
-    
-    @font.render("+10", true, [241, 225, 53, 10]).blit(@screen, [item.x * CELL_SIZE, (item.y - ((256 - item.life) / CELL_SIZE )) * CELL_SIZE])
+    surface = @media_bag["gfx/bg_navy_score10.png"].to_display
+    surface.alpha= item.life
+    surface.blit(@screen, [item.x * CELL_SIZE + rand(5), (item.y - ((256 - item.life) / CELL_SIZE )) * CELL_SIZE])
   end
   
   def draw_rope(position)
-    surface = Surface['rope.png']
+    surface = @media_bag["gfx/rope.png"].to_display
     to_blit_position = position.dup
     to_blit_position.x *= CELL_SIZE
     to_blit_position.y *= CELL_SIZE
@@ -384,8 +391,8 @@ class Game
   end
   
   def draw_player
-    png = @player.direction == :left ? 'ninja_left.png' : 'ninja_right.png'
-    surface = Surface[png]
+    png = @player.direction == :left ? 'ninja_left' : 'ninja_right'
+    surface = @media_bag["gfx/#{png}.png"].to_display
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE
@@ -393,7 +400,7 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = Surface["#{item.kind}.png"]
+    surface = @media_bag["gfx/#{item.kind}.png"].to_display
     surface.alpha= item.life
     surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
