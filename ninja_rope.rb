@@ -9,7 +9,7 @@ require 'pp'
 Rubygame.init
 include Rubygame
 
-ITEM_LIFETIME = 2000
+ITEM_LIFETIME = 3500
 REPEAT_TIME = 50
 CELL_SIZE = 24
 GRAVITY = 5 # cell down per second
@@ -266,7 +266,7 @@ class Game
        i = Item.new(lifetime, item.kind)
        i.x = @player.x
        i.y = @player.y
-       @catched_item << i
+       @catched_item << i if i.kind == 'bonus'
        item_kind = item.kind
        @score += 10 if item_kind == 'bonus'
        @grid[@player.x][@player.y] = nil
@@ -395,7 +395,7 @@ class Game
   end
   
   def draw_rope(position)
-    surface = @media_bag["gfx/rope.png"].to_display
+    surface = @media_bag["gfx/rope.png"].to_display_alpha
     to_blit_position = position.dup
     to_blit_position.x *= CELL_SIZE
     to_blit_position.y *= CELL_SIZE

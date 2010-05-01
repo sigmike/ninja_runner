@@ -11,8 +11,24 @@ if ARGV.first
   scenario = File.read(ARGV.first)
   puts scenario.split("\n")
   game.scenario = scenario
-else
+else #15450
   game.scenario =
+  (1..100).map { |i|
+      (0..39).map { |x|
+        timer += 32
+        (22..23).map { |y|
+          kind = rand(20) == 1 ? 'bonus' : 'brick'
+          if kind == 'brick' && rand (20) != 1
+            "#{timer} #{x},#{y} #{kind}"
+          elsif kind == 'brick'
+            "#{timer} #{x},#{16 - rand(5)} #{kind}"
+          else
+            "#{timer} #{x},#{22 - rand(5)} #{kind}"
+          end
+        }
+      }
+    }.join("\n")
+    puts timer
 =begin
 # scénario qui ne contient qu'une brique
     (1..200).map { |i|
@@ -20,7 +36,6 @@ else
       kind = 'brick'
       "#{timer} 10,10 #{kind}"
     }.join("\n")
-=end
 # scenario assez alléatoire
     ((1..12).map { |x|
       (1..14).map { |y|
@@ -34,6 +49,7 @@ else
       kind = rand(2) == 1 ? 'brick' : 'bonus'
       "#{timer} #{rand 30},#{rand 25} #{kind}"
     }).join("\n")
+=end
 end
   
 # options de lancement
