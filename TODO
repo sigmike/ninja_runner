@@ -4,7 +4,7 @@
 - avoir une rope qui évolue correctement
 -/ se décroche si la brick disparait
 -/ se casse sur les briques
-- adapter la gravité quand on a déployé la rope
+-/ adapter la gravité quand on a déployé la rope
 - pouvoir se décrocher de la rope
 - pouvoir monter et decendre sur la rope
 - définir une longueur max

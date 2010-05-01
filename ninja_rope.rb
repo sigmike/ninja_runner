@@ -294,7 +294,7 @@ class Game
   def rope_max_down?
     if rope_active?
       result = true
-      first_x = @rope_path.first.x
+      first_x = accroch_point.x
       @rope_path.each do |position|
         if position.x != first_x
           result = nil
@@ -314,26 +314,31 @@ class Game
   # fait tomber le joueur
   
   def apply_gravity lifetime
-    while lifetime - @last_down_time > MILLISECONDS_PER_CELL
-      old_player_direction = @player.direction
+    if rope_max_down?
+      @last_down_time = lifetime
+    else
       
-      if rope_active?
-        @player.direction = accroch_point_at_left? ? :left : :right
-        @player.apply_direction if @player.can_move?
-      end
-      
-      if rope_max_down?
-        @player.direction = old_player_direction
-        @last_down_time = lifetime
-        break
-      end
-      
-      @player.direction = :down
-      @player.apply_direction if @player.can_move?
-      
-      @player.direction = old_player_direction
+      while lifetime - @last_down_time > MILLISECONDS_PER_CELL
+        old_player_direction = @player.direction
         
-      @last_down_time += MILLISECONDS_PER_CELL
+        if rope_active?
+          @player.direction = accroch_point_at_left? ? :left : :right
+          @player.apply_direction if @player.can_move?
+        end
+        
+        if rope_max_down?
+          @player.direction = old_player_direction
+          @last_down_time = lifetime
+          break
+        end
+        
+        @player.direction = :down
+        @player.apply_direction if @player.can_move?
+
+        @player.direction = old_player_direction
+
+        @last_down_time += MILLISECONDS_PER_CELL
+      end
     end
   end
 
