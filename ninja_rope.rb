@@ -347,10 +347,10 @@ class Game
     update_catched_items(lifetime)
     catch_item(lifetime)
     
-    draw
+    draw(lifetime)
   end
   
-  def draw
+  def draw lifetime
     each_item do |x, y, item|
       draw_item(x, y, item)
     end
@@ -369,10 +369,14 @@ class Game
 
     draw_player
     
-    @font.render(score.to_s, true, [238, 154, 44]).blit(@screen, [100, 25])
+    @font.render(score.to_s + ' points', true, [238, 154, 44]).blit(@screen, [770, 25])
     score_offset_x = rand(6) - 3
     score_offset_y = rand(6) - 3
-    @font.render(score.to_s, true, [241, 225, 53]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
+    @font.render(score.to_s + ' points', true, [241, 225, 53]).blit(@screen, [770 + score_offset_x, 25 + score_offset_y])
+    
+    
+    @font.render('time: ' + lifetime.to_s, false, [79, 48, 11]).blit(@screen, [100, 25])
+    @font.render('time: ' + lifetime.to_s, false, [37, 34, 29]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
     @screen.update
   end
   
