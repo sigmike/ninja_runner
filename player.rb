@@ -61,9 +61,13 @@ class Player
   # indique une direction
   
   def start_moving(direction, lifetime)
-    @direction = direction
-    @last_movement_lifetime = nil
-    move(lifetime)
+    if (direction != :up && direction != :down) || # fait passer gauche et droite
+    (@game.rope.active? && direction != :up) || # fait passer haut + corde
+    (@game.rope.active? && direction != :down) # fait passer bas + corde
+      @direction = direction
+      @last_movement_lifetime = nil
+      move(lifetime)
+    end
   end
   
   # enlève la direction
