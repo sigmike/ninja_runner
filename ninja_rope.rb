@@ -8,7 +8,7 @@ require 'pp'
 Rubygame.init
 include Rubygame
 
-ITEM_LIFETIME = 6000
+ITEM_LIFETIME = 2000
 REPEAT_TIME = 50
 CELL_SIZE = 24
 GRAVITY = 5 # cell down per second
@@ -43,6 +43,7 @@ class Game
     @grid = Array.new(@width) { Array.new(@height) }
     @record_grid = Array.new(@width) { Array.new(@height) }
     @screen = Rubygame::Screen.new([@width * CELL_SIZE, @height * CELL_SIZE])
+    @catched_item = []
     
     if @music_enabled
       @music = Rubygame::Music.load "music/2 - Please.mp3"
@@ -232,13 +233,31 @@ class Game
     end
   end
   
+  # mets à jour la vie des items catchés
+  
+  def update_catched_items(lifetime)
+    @catched_item.each do |item|
+      item.update(lifetime)
+      unless item.alive?
+        @catched_item.delete(item)
+      end
+    end
+  end
+  
+  # fait bouger le Player
+  
   def update_player(lifetime)
     @player.move(lifetime)
   end
   
-  def catch_item
+  def catch_item(lifetime)
     if item(@player.x, @player.y)
-       item_kind = @grid[@player.x][@player.y].kind
+       item = @grid[@player.x][@player.y]
+       i = Item.new(lifetime, item.kind)
+       i.x = @player.x
+       i.y = @player.y
+       @catched_item << i
+       item_kind = item.kind
        @score += 10 if item_kind == 'bonus'
        @grid[@player.x][@player.y] = nil
     end
@@ -316,7 +335,8 @@ class Game
     update_record_grid(lifetime)
     update_player(lifetime)
 
-    catch_item
+    update_catched_items(lifetime)
+    catch_item(lifetime)
     
     draw
   end
@@ -333,14 +353,26 @@ class Game
     @rope.path.each do |position|
       draw_rope(position)
     end
+    
+    @catched_item.each do |item|
+      draw_catched_item item
+    end
 
     draw_player
     
-    @font.render(score.to_s, true, [238, 154, 44]).blit(@screen, [100, 25])
+    @font.render(score.to_s, true, [238, 154, 44], [42, 44, 46]).blit(@screen, [100, 25])
     score_offset_x = rand(6) - 3
     score_offset_y = rand(6) - 3
     @font.render(score.to_s, true, [241, 225, 53]).blit(@screen, [100 + score_offset_x, 25 + score_offset_y])
     @screen.update
+  end
+  
+  def draw_catched_item(item)
+    #surface = Surface["#{item.kind}.png"]
+    #surface.set_alpha item.life
+    #surface.blit(@screen, [ item.x * CELL_SIZE, (item.y + (item.life / CELL_SIZE )) * CELL_SIZE])
+    
+    @font.render("+10", true, [241, 225, 53, 10]).blit(@screen, [item.x * CELL_SIZE, (item.y - ((256 - item.life) / CELL_SIZE )) * CELL_SIZE])
   end
   
   def draw_rope(position)
@@ -362,7 +394,7 @@ class Game
   
   def draw_item(x, y, item)
     surface = Surface["#{item.kind}.png"]
-    surface.set_alpha item.life
+    surface.alpha= item.life
     surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
   
