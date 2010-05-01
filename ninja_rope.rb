@@ -2,6 +2,7 @@ require 'rubygame'
 require 'player'
 require 'item'
 require 'game_event'
+require 'rope'
 require 'pp'
 
 Rubygame.init
@@ -25,12 +26,13 @@ class Game
     :music_enabled,
     :score,
     :record_enabled,
-    :rope_path
+    :rope
     
   attr_reader :width, :height
   
   def start
     @player = Player.new(self)
+    @rope = Rope.new(self, @player)
     @clock = Rubygame::Clock.new
     Rubygame::TTF.setup
     @font = Rubygame::TTF.new 'fonts/arial.ttf', 23
@@ -180,6 +182,7 @@ class Game
             if !accessible?(x, y)
               # accroche la rope
               @cell_mouse_click = [x, y, 0, 0]
+              @rope.accroch(@cell_mouse_click)
               if @record_enabled
                 @record_grid[x][y] = Item.new lifetime, 'bonus'
                 puts "#{lifetime} #{x},#{y} bonus"
@@ -187,7 +190,7 @@ class Game
             end
           when Rubygame::MOUSE_RIGHT
             # décroche la rope
-            @cell_mouse_click = nil
+            @rope.deccroch
         end
       when Rubygame::QuitEvent
         @end = true
@@ -260,87 +263,28 @@ class Game
     end
   end
   
+  # met à jour le chemin de la rope
+  
   def update_rope_path
-    @rope_path = []
-    if accroch_point
-      
-      position = accroch_point.dup
-
-      while position != @player.position
-        if accessible?(accroch_point.x, accroch_point.y)
-          @cell_mouse_click = nil
-          break
-        end
-      
-        new_position = position.dup
-        
-        if position.x < @player.position.x
-          new_position.x = accessible?(new_position.x + 1, new_position.y) ? new_position.x + 1 : new_position.x
-        elsif position.x > @player.position.x
-          new_position.x = accessible?(new_position.x - 1, new_position.y) ? new_position.x - 1 : new_position.x
-        end
-        
-        if position.y < @player.position.y
-          new_position.y = accessible?(new_position.x, new_position.y + 1) ? new_position.y + 1 : new_position.y
-        elsif position.y > @player.position.y
-          new_position.y = accessible?(new_position.x, new_position.y - 1) ? new_position.y - 1 : new_position.y
-        end
-        
-        if position != new_position
-          position = new_position
-        else
-          @cell_mouse_click = nil
-          break
-        end
-        @rope_path << position.dup
-      end
-    end
+    @rope.update
   end
   
-  def rope_active?
-    @cell_mouse_click
-  end
-  
-  def rope_max_down?
-    if rope_active?
-      result = true
-      first_x = accroch_point.x
-      @rope_path.each do |position|
-        if position.x != first_x
-          result = nil
-          break
-        end
-      end
-      result
-    else
-      nil
-    end
-  end
-  
-  def accroch_point_at_left?
-    @player.position.x > accroch_point.x
-  end
-  
-  def accroch_point_at_top?
-    @player.position.y > accroch_point.y
-  end
-
   # fait tomber le joueur
   
   def apply_gravity_with_rope_contraint lifetime
-    if rope_max_down?
+    if @rope.max_down?
       @last_down_time = lifetime
     else
       
       while lifetime - @last_down_time > MILLISECONDS_PER_CELL
         old_player_direction = @player.direction
         
-        if rope_active? && accroch_point_at_top?
-          @player.direction = accroch_point_at_left? ? :left : :right
+        if @rope.active? && @rope.accroch_point_at_top?
+          @player.direction = @rope.accroch_point_at_left? ? :left : :right
           @player.apply_direction(false) if @player.can_move?
         end
         
-        if rope_max_down?
+        if @rope.max_down?
           @player.direction = old_player_direction
           @last_down_time = lifetime
           break
@@ -386,7 +330,7 @@ class Game
       draw_item(x, y, item)
     end
 
-    @rope_path.each do |position|
+    @rope.path.each do |position|
       draw_rope(position)
     end
 

@@ -52,8 +52,8 @@ class Player
   
   def rope_effect_up
     rope_effect_up = 0
-    if @game.rope_active? && @direction != :up && @direction != :down
-      rope_effect_up = @game.accroch_point_at_top? ? 1 : -1
+    if @game.rope.active? && @direction != :up && @direction != :down
+      rope_effect_up = @game.rope.accroch_point_at_top? ? 1 : -1
     end
     rope_effect_up
   end
