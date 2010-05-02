@@ -9,21 +9,19 @@ timer = 0
 # construction du scénario
 if ARGV.first
   scenario = File.read(ARGV.first)
-  puts scenario.split("\n")
   game.scenario = scenario
 else #15450
   game.scenario =
   (1..100).map { |i|
       (0..39).map { |x|
-        timer += 32
+        timer += 60
         (22..23).map { |y|
-          kind = rand(20) == 1 ? 'bonus' : 'brick'
-          if kind == 'brick' && rand (20) != 1
-            "#{timer} #{x},#{y} #{kind}"
-          elsif kind == 'brick'
-            "#{timer} #{x},#{16 - rand(5)} #{kind}"
+          if y == 22 || (x != 10 && x != 11 && x != 22 && x != 23)
+            "#{timer} #{x},#{y} brick"
+          elsif x == 10 || x == 23
+            "#{timer} #{x},15 brick"
           else
-            "#{timer} #{x},#{22 - rand(5)} #{kind}"
+            "#{timer} #{x},18 bonus"
           end
         }
       }

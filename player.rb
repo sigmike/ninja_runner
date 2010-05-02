@@ -65,8 +65,9 @@ class Player
     (@game.rope.active? && direction != :up) || # fait passer haut + corde
     (@game.rope.active? && direction != :down) # fait passer bas + corde
       @direction = direction
-      @last_movement_lifetime = nil
-      move(lifetime)
+      @last_movement_lifetime = lifetime
+      apply_direction
+      @game.catch_item(lifetime)
     end
   end
   
@@ -80,12 +81,15 @@ class Player
   # applique la direction en cours en passant par toutes les positions
   
   def move(lifetime)
+    @game.catch_item(lifetime)
     if @direction
-      while (@last_movement_lifetime.nil? or lifetime >= @last_movement_lifetime + REPEAT_TIME) and can_move?
+      while lifetime >= @last_movement_lifetime + REPEAT_TIME && can_move?
         apply_direction
-        @last_movement_lifetime = lifetime # Que se passe-t-il si on ne peut pas aller sur la case ?
+        @game.catch_item(lifetime)
+        @last_movement_lifetime += REPEAT_TIME
       end
     end
+    
   end
   
   def x

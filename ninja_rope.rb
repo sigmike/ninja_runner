@@ -9,8 +9,8 @@ require 'pp'
 Rubygame.init
 include Rubygame
 
-ITEM_LIFETIME = 3500
-REPEAT_TIME = 50
+ITEM_LIFETIME = 3000
+REPEAT_TIME = 100
 CELL_SIZE = 24
 GRAVITY = 5 # cell down per second
 
@@ -58,7 +58,13 @@ class Game
     @media_bag.load_image "gfx/brick.png"
     @media_bag.load_image "gfx/rope.png"
     @media_bag.load_image "gfx/background.png" #960 x 476
-
+    
+    @surface_brick = @media_bag['gfx/brick.png'].to_display
+    @surface_bonus = @media_bag['gfx/bonus.png'].to_display
+    @surface_background = @media_bag["gfx/background.png"].to_display
+    @surface_ninja_left = @media_bag["gfx/ninja_left.png"].to_display_alpha
+    @surface_ninja_right = @media_bag["gfx/ninja_right.png"].to_display_alpha
+    
   end
   
   def music_playing?
@@ -263,12 +269,13 @@ class Game
   def catch_item(lifetime)
     if item(@player.x, @player.y)
        item = @grid[@player.x][@player.y]
-       i = Item.new(lifetime, item.kind)
-       i.x = @player.x
-       i.y = @player.y
-       @catched_item << i if i.kind == 'bonus'
-       item_kind = item.kind
-       @score += 10 if item_kind == 'bonus'
+       if item.kind == 'bonus'
+         i = Item.new(lifetime, item.kind)
+         i.x = @player.x
+         i.y = @player.y
+         @catched_item << i
+         @score += 10
+       end 
        @grid[@player.x][@player.y] = nil
     end
   end
@@ -341,12 +348,11 @@ class Game
     apply_gravity_with_rope_contraint(lifetime)
     update_rope_path
         
-    update_grid(lifetime)
     update_record_grid(lifetime)
     update_player(lifetime)
+    update_grid(lifetime)
 
     update_catched_items(lifetime)
-    catch_item(lifetime)
     
     draw(lifetime)
   end
@@ -381,9 +387,6 @@ class Game
     end
 
     draw_player
-    
-   
-    
 
     @screen.update
   end
@@ -396,20 +399,19 @@ class Game
   
   def draw_rope(position)
     surface = @media_bag["gfx/rope.png"].to_display_alpha
-    to_blit_position = position.dup
-    to_blit_position.x *= CELL_SIZE
-    to_blit_position.y *= CELL_SIZE
-    surface.blit(@screen, to_blit_position)
+    position = position.dup
+    position.x *= CELL_SIZE
+    position.y *= CELL_SIZE
+    surface.blit(@screen, position)
   end
   
   def draw_background
-    surface = @media_bag["gfx/background.png"].to_display
+    surface = @surface_background
     surface.blit(@screen, [0, 0])
   end
   
   def draw_player
-    png = @player.direction == :left ? 'ninja_left' : 'ninja_right'
-    surface = @media_bag["gfx/#{png}.png"].to_display_alpha
+    surface = @player.direction == :left ? @surface_ninja_left : @surface_ninja_right
     position = @player.position.dup
     position.x *= CELL_SIZE
     position.y *= CELL_SIZE
@@ -417,9 +419,9 @@ class Game
   end
   
   def draw_item(x, y, item)
-    surface = @media_bag["gfx/#{item.kind}.png"].to_display
+    surface = item.kind == 'brick' ? @surface_brick : @surface_bonus
     surface.alpha= item.life
-    surface.to_display_alpha.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
+    surface.blit(@screen, [x * CELL_SIZE, y * CELL_SIZE])
   end
   
   def item(x, y)
