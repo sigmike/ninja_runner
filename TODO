@@ -9,6 +9,7 @@
 -/ pouvoir monter et decendre sur la rope
 -/ définir une longueur max
 -/ pouvoir se balancer
+- dessiner la rope en trait (à l'aide de RubyGame::gfx:draw_line)
 
 # améliorer les gfx
 
