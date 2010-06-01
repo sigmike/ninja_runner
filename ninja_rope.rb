@@ -378,9 +378,7 @@ class Game
       draw_item(x, y, item)
     end
 
-    @rope.path.each do |position|
-      draw_rope(position)
-    end
+    @rope.draw
     
     @catched_item.each do |item|
       draw_catched_item item

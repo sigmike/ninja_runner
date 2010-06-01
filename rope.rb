@@ -24,8 +24,27 @@ class Rope
     @accroch_point
   end
   
+  def cell_center_to_px(pt)
+    pt * CELL_SIZE + CELL_SIZE / 2
+  end
+  
   def deccroch
     @accroch_point = nil
+  end
+  
+  def draw
+    if active? || ! @path.flatten.empty?
+      first_cell = @path.first
+      first_pt = [cell_center_to_px(first_cell.x), cell_center_to_px(first_cell.y)]
+      
+      last_cell = @path.last
+      last_pt = [cell_center_to_px(last_cell.x), cell_center_to_px(last_cell.y)]
+      
+      surface = @game.screen
+      
+      color = [180, 100, 30, 200]
+      surface.draw_line_a(first_pt, last_pt, color)
+    end
   end
   
   def max_down?
