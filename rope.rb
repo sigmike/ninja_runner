@@ -33,7 +33,7 @@ class Rope
   end
   
   def draw
-    if active? || ! @path.flatten.empty?
+    if active? and ! @path.flatten.empty?
       first_cell = @path.first
       first_pt = [cell_center_to_px(first_cell.x), cell_center_to_px(first_cell.y)]
       
