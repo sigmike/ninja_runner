@@ -171,14 +171,14 @@ class Game
       when Rubygame::KeyDownEvent
         case event.key
         when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
-          @player.start_moving(key_direction(event.key), lifetime)
+          @player.start_moving key_direction(event.key)
         end
       when Rubygame::KeyUpEvent
         case event.key
         when Rubygame::K_ESCAPE
           @end = true
         when Rubygame::K_RIGHT, Rubygame::K_LEFT, Rubygame::K_UP, Rubygame::K_DOWN
-          @player.stop_moving if @player.direction == key_direction(event.key)
+          @player.stop_moving key_direction(event.key)
         end
       when Rubygame::MouseMotionEvent
         if event.buttons.include?(Rubygame::MOUSE_LEFT)
@@ -267,16 +267,16 @@ class Game
   end
   
   def catch_item(lifetime)
-    if item(@player.x, @player.y)
-       item = @grid[@player.x][@player.y]
+    if item(@player.grid_x, @player.grid_y)
+       item = @grid[@player.grid_x][@player.grid_y]
        if item.kind == 'bonus'
          i = Item.new(lifetime, item.kind)
-         i.x = @player.x
-         i.y = @player.y
+         i.x = @player.grid_x
+         i.y = @player.grid_y
          @catched_item << i
          @score += 10
        end 
-       @grid[@player.x][@player.y] = nil
+       @grid[@player.grid_x][@player.grid_y] = nil
     end
   end
   
@@ -305,37 +305,6 @@ class Game
     @rope.update
   end
   
-  # fait tomber le joueur
-  
-  def apply_gravity_with_rope_contraint lifetime
-    if @rope.max_down?
-      @last_down_time = lifetime
-    else
-      
-      while lifetime - @last_down_time > MILLISECONDS_PER_CELL
-        old_player_direction = @player.direction
-        
-        if @rope.active? && @rope.accroch_point_at_top?
-          @player.direction = @rope.accroch_point_at_left? ? :left : :right
-          @player.apply_direction(false) if @player.can_move?
-        end
-        
-        if @rope.max_down?
-          @player.direction = old_player_direction
-          @last_down_time = lifetime
-          break
-        end
-        
-        @player.direction = :down
-        @player.apply_direction(false) if @player.can_move?
-
-        @player.direction = old_player_direction
-
-        @last_down_time += MILLISECONDS_PER_CELL
-      end
-    end
-  end
-
   def update
     @screen.fill([0,0,0])
   
@@ -345,7 +314,6 @@ class Game
     process_game_events(lifetime)
     
     update_rope_path
-    apply_gravity_with_rope_contraint(lifetime)
     update_rope_path
         
     update_record_grid(lifetime)
@@ -410,9 +378,7 @@ class Game
   
   def draw_player
     surface = @player.direction == :left ? @surface_ninja_left : @surface_ninja_right
-    position = @player.position.dup
-    position.x *= CELL_SIZE
-    position.y *= CELL_SIZE
+    position = Rubygame::Rect.new(@player.position_x, @player.position_y, 0, 0)
     surface.blit(@screen, position)
   end
   

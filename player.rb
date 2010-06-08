@@ -11,43 +11,62 @@ end
 # Player représente le joueur dans le jeu
 
 class Player
-  attr_accessor :position, :direction, :movement_lifetime, :target
+  attr_accessor :position_x, :position_y, :direction, :movement_lifetime
   
   def initialize(game)
     @game = game
-    @position = Rubygame::Rect.new(0, 0, 0, 0)
-    @target = Rubygame::Rect.new(0, 0, 0, 0)
+    @position_x = 0
+    @position_y = 0
+    @vector_x = 0
+    @vector_y = 0
+    @velocity_x = 0
+    @velocity_y = 0
+    @last_movement_lifetime = 0
   end
-
-  # détermine le déplacement en fonction de la direction
   
-  def next_move
-    {
-      :right => [1, 0],
-      :left => [-1, 0],
-      :up => [0, -1],
-      :down => [0, 1],
-    }[@direction]
+  def direction
+    if @vector_x >= 0
+      :right
+    else
+      :left
+    end
   end
-    
-  # applique la direction pour une case
   
-  def apply_direction(with_rope_effect = true)
+  # applique la direction
+  
+  ACCEL = 10.0
+  VELOCITY = 1000.0
+  
+  def apply_direction(time, with_rope_effect = true)
+    time /= 1000.0
     r = with_rope_effect ? rope_effect_up : 0
-    d = next_move
-    @position.x += d[0]
-    @position.y += d[1] + r
-    @position.x %= @game.width
-    @position.y %= @game.height
+    gravity = 0 #GRAVITY * CELL_SIZE / 10000 # px/ms
+
+    accel_x = @vector_x * ACCEL
+    accel_y = gravity + @vector_y * ACCEL
+    
+    @velocity_x = @vector_x * time
+    @velocity_y = @vector_y * time
+    
+    @position_x += @velocity_x * time * VELOCITY
+    @position_y += @velocity_y * time * VELOCITY
+    @position_x %= @game.width * CELL_SIZE
+    @position_y %= @game.height * CELL_SIZE
+    
+    p accel_x
+    p accel_y
+    p @velocity_x
+    p @position_x
   end
   
   # demande au jeu si la case est accéssible
   
   def can_move?
-    x = (@position.x + next_move[0]) % @game.width
-    y = (@position.y + next_move[1] + rope_effect_up) % @game.height
+    #x = (@position_x + next_move[0]) % @game.width
+    #y = (@position_y + next_move[1] + rope_effect_up) % @game.height
 
-    @game.accessible?(x, y)
+    #@game.accessible?(x, y)
+    true
   end
   
   def rope_effect_up
@@ -60,44 +79,41 @@ class Player
   
   # indique une direction
   
-  def start_moving(direction, lifetime)
-    if (direction != :up && direction != :down) || # fait passer gauche et droite
-    (@game.rope.active? && direction != :up) || # fait passer haut + corde
-    (@game.rope.active? && direction != :down) # fait passer bas + corde
-      @direction = direction
-      @last_movement_lifetime = lifetime
-      apply_direction
-      @game.catch_item(lifetime)
-    end
+  def start_moving(direction)
+    @vector_y += direction == :up ? -1 : 1 if direction == :up || direction == :down
+    @vector_x += direction == :left ? -1 : 1 if direction == :right || direction == :left
   end
   
   # enlève la direction
 
-  def stop_moving
-    @direction = nil
-    @last_movement_lifetime = nil
+  def stop_moving(direction)
+    @vector_y -= direction == :up ? -1 : 1 if direction == :up || direction == :down
+    @vector_x -= direction == :left ? -1 : 1 if direction == :right || direction == :left
   end
   
   # applique la direction en cours en passant par toutes les positions
   
   def move(lifetime)
+    dt = lifetime - @last_movement_lifetime
+    apply_direction dt
     @game.catch_item(lifetime)
-    if @direction
-      while lifetime >= @last_movement_lifetime + REPEAT_TIME && can_move?
-        apply_direction
-        @game.catch_item(lifetime)
-        @last_movement_lifetime += REPEAT_TIME
-      end
-    end
-    
+    @last_movement_lifetime = lifetime
   end
   
   def x
-    @position.x
+    @position_x
   end
   
   def y
-    @position.y
+    @position_y
+  end
+  
+  def grid_x
+    @position_x / CELL_SIZE
+  end
+  
+  def grid_y
+    @position_y / CELL_SIZE
   end
 end
 
