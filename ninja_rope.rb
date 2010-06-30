@@ -12,7 +12,8 @@ include Rubygame
 ITEM_LIFETIME = 3000 # vie des items
 REPEAT_TIME = 100 # durée d'un tour de jeu
 CELL_SIZE = 24 # nombre de pixels
-GRAVITY = 5 # cell down per second
+GRAVITY = 0.01 # cell/s
+VELOCITY = 0.5 * GRAVITY # cell/s
 
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
 
