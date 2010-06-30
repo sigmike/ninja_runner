@@ -1,11 +1,11 @@
-flexmock
-rspec
-expectations
-spec
-polyglot
-cucumber
-rubygame
+#!/bin/sh
 
+echo PACKAGES
+echo install all necessary packages
+
+echo installating ubuntu packages...
+
+packages="
 libsdl-ttf2.0-dev
 libsdl-mixer1.2-dev
 libsdl-image1.2-dev
@@ -13,6 +13,23 @@ libsdl-gfx1.2-dev
 libsdl1.2-dev
 ruby-dev
 ruby
+rubygems
+"
 
-git-core
+sudo aptitude install $packages
 
+# git-core
+
+echo intalling gems...
+
+gems="
+flexmock
+rspec
+expectations
+spec
+polyglot
+cucumber
+rubygame
+"
+
+sudo gem install $gems
