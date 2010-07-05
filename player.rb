@@ -35,12 +35,11 @@ class Player
   # applique la direction
   
   def apply_direction(time, with_rope_effect = true)
-    # time /= 1000.0
     r = with_rope_effect ? rope_effect_up : 0
     gravity = GRAVITY
 
-    @velocity_x = @vector_x * VELOCITY * CELL_SIZE #* time
-    @velocity_y = (gravity + @vector_y * VELOCITY) * CELL_SIZE #* time
+    @velocity_x = @vector_x * VELOCITY * CELL_SIZE
+    @velocity_y = (gravity + @vector_y * VELOCITY) * CELL_SIZE
     
     @position_x += @velocity_x * time 
     @position_y += @velocity_y * time
