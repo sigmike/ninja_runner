@@ -2,9 +2,34 @@
 
 require 'rubygems'
 require 'ninja_rope'
+require 'optparse'
 
 game = Game.new
 timer = 0
+
+# options par défaut
+game.music_enabled = true
+game.record_enabled = false
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #$0 [<scenario file>]"
+
+  opts.on("-n", "--no-sound", "Run without sound") do
+    game.music_enabled = false
+  end
+
+  opts.on("-r", "--record", "Record scenario to stdout") do
+    game.record_enabled = true
+  end
+
+  opts.on("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+end.parse!
+
 
 # construction du scénario
 if ARGV.first
@@ -50,10 +75,6 @@ else #15450
 =end
 end
   
-# options de lancement
-game.music_enabled = true
-game.record_enabled = false
-
 # boucle principale
 game.start
 while not game.end?
