@@ -36,26 +36,88 @@ class Player
   
   def apply_direction(time, with_rope_effect = true)
     r = with_rope_effect ? rope_effect_up : 0
-    gravity = GRAVITY
+    gravity = 0 #GRAVITY
 
     @velocity_x = @vector_x * VELOCITY * CELL_SIZE
     @velocity_y = (gravity + @vector_y * VELOCITY) * CELL_SIZE
     
-    @position_x += @velocity_x * time 
-    @position_y += @velocity_y * time
+    new_position_x = @position_x + @velocity_x * time 
+    new_position_y = @position_y + @velocity_y * time
     
-    @position_x %= @game.width * CELL_SIZE
-    @position_y %= @game.height * CELL_SIZE
+    x0 = @position_x
+    y0 = @position_y
+    x1 = new_position_x
+    y1 = new_position_y
+    
+    dx = x1 - x0
+    dy = y1 - y0
+    
+    max = [dx.abs, dy.abs].max
+    
+    if (max != 0)
+      step_x = dx / max
+      step_y = dy / max
+      
+      # current x and y
+      cx = x0
+      cy = y0
+      collided = false
+    
+      #puts "cx : #{cx}  ###  x1 : #{x1} ||| cy : #{cy}  ###  y1 : #{y1}"
+    
+      dirx = (x1 > x0) ? 1 : -1
+      diry = (y1 > y0) ? 1 : -1
+      if (dirx > 0) && (diry > 0)
+	test_end = proc { (cx < x1) && (cy < y1) }
+      elsif (dirx > 0) && (diry < 0)
+	test_end = proc { (cx < x1) && (cy > y1) }
+      elsif (dirx < 0) && (diry > 0)
+	test_end = proc { (cx > x1) && (cy < y1) }
+      else
+	test_end = proc { (cx > x1) && (cy > y1) }
+      end
+      
+      while test_end.call
+	cx += step_x
+	cy += step_y
+	if collide?(cx, cy)
+	  collided = true
+	  cx -= step_x
+	  cy -= step_y
+	  break
+	end
+      end
+      
+      if !collided
+	step_x = x1 - cx
+	step_y = y1 - cy
+	cx += step_x
+	cy += step_y
+	if collide?(cx, cy)
+	  puts 'collided ici'
+	  collided = true
+	  cx -= step_x
+	  cy -= step_y
+	end
+      else
+	puts 'collided'
+      end
+
+      @position_x = cx
+      @position_y = cy
+      
+      @position_x %= @game.width * CELL_SIZE
+      @position_y %= @game.height * CELL_SIZE
+    else
+      puts "no max, sorry"
+    end
   end
   
-  # demande au jeu si la case est accéssible
-  
-  def can_move?
-    #x = (@position_x + next_move[0]) % @game.width
-    #y = (@position_y + next_move[1] + rope_effect_up) % @game.height
+  def collide?(x, y)
+    x = (x / CELL_SIZE).round % @game.width
+    y = (y / CELL_SIZE).round % @game.height
 
-    #@game.accessible?(x, y)
-    true
+    !@game.accessible?(x, y)
   end
   
   def rope_effect_up
