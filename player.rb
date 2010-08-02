@@ -49,68 +49,93 @@ class Player
     x1 = new_position_x
     y1 = new_position_y
     
-    dx = x1 - x0
-    dy = y1 - y0
-    
-    max = [dx.abs, dy.abs].max
-    
-    if (max != 0)
-      step_x = dx / max
-      step_y = dy / max
+    loop do
+      break if x0 == x1 and y0 == y1
       
-      # current x and y
-      cx = x0
-      cy = y0
-      collided = false
+      dx = x1 - x0
+      dy = y1 - y0
+      
+      end_cell_x = (x1 / CELL_SIZE).to_i
+      end_cell_y = (y1 / CELL_SIZE).to_i
+      
+      cell_x = (x0 / CELL_SIZE).to_i
+      cell_y = (y0 / CELL_SIZE).to_i
+      
+      vertical_left = cell_x * CELL_SIZE
+      vertical_right = (cell_x + 1) * CELL_SIZE - EPSILON
+      horizontal_top = cell_y * CELL_SIZE
+      horizontal_bottom = (cell_y + 1) * CELL_SIZE - EPSILON
     
-      #puts "cx : #{cx}  ###  x1 : #{x1} ||| cy : #{cy}  ###  y1 : #{y1}"
-    
-      dirx = (x1 > x0) ? 1 : -1
-      diry = (y1 > y0) ? 1 : -1
-      if (dirx > 0) && (diry > 0)
-	test_end = proc { (cx < x1) && (cy < y1) }
-      elsif (dirx > 0) && (diry < 0)
-	test_end = proc { (cx < x1) && (cy > y1) }
-      elsif (dirx < 0) && (diry > 0)
-	test_end = proc { (cx > x1) && (cy < y1) }
-      else
-	test_end = proc { (cx > x1) && (cy > y1) }
+      unless @game.accessible?(cell_x, cell_y)
+	break
       end
       
-      while test_end.call
-	cx += step_x
-	cy += step_y
-	if collide?(cx, cy)
-	  collided = true
-	  cx -= step_x
-	  cy -= step_y
-	  break
+      if end_cell_x == cell_x and end_cell_y == cell_y
+	x0 = x1
+	y0 = y1
+      else
+	vertical_right_y = y0 + (x0 - vertical_right) * dy / dx
+	vertical_left_y = y0 + (x0 - vertical_left) * dy / dx
+	horizontal_top_x = x0 + (y0 - horizontal_top ) * dx / dy
+	horizontal_bottom_x = x0 + (y0 - horizontal_bottom ) * dx / dy
+	  
+	if dx < 0 and vertical_left_y > horizontal_top and vertical_left_y < horizontal_bottom
+	  next_cell_x = cell_x - 1
+	  next_cell_y = cell_y
+	  if @game.accessible?(next_cell_x, next_cell_y)
+	    x0 = vertical_left - EPSILON
+	    y0 = vertical_left_y
+	  else
+	    x0 = x1 = vertical_left
+	    y0 = y1 = vertical_left_y
+	  end
+	  
+	elsif dx > 0 and vertical_right_y > horizontal_top and vertical_right_y < horizontal_bottom
+	  next_cell_x = cell_x + 1
+	  next_cell_y = cell_y
+	  if @game.accessible?(next_cell_x, next_cell_y)
+	    x0 = vertical_right + EPSILON
+	    y0 = vertical_right_y
+	  else
+	    x0 = x1 = vertical_right
+	    y0 = y1 = vertical_right_y
+	  end
+	  
+	elsif dy > 0 and horizontal_bottom_x > vertical_left and horizontal_bottom_x < vertical_right
+	  next_cell_x = cell_x
+	  next_cell_y = cell_y + 1
+	  if @game.accessible?(next_cell_x, next_cell_y)
+	    x0 = horizontal_bottom_x
+	    y0 = horizontal_bottom + EPSILON
+	  else
+	    x0 = x1 = horizontal_bottom_x
+	    y0 = y1 = horizontal_bottom
+	  end
+	  
+	elsif dy < 0 and horizontal_top_x > vertical_left and horizontal_top_x < vertical_right
+	  next_cell_x = cell_x
+	  next_cell_y = cell_y - 1
+	  if @game.accessible?(next_cell_x, next_cell_y)
+	    x0 = horizontal_top_x
+	    y0 = horizontal_top - EPSILON
+	  else
+	    x0 = x1 = horizontal_top_x
+	    y0 = y1 = horizontal_top
+	  end
+	  
+	else
+	  p "diagonale"
+	  x0 = x1
+	  y0 = y1
 	end
       end
-      
-      if !collided
-	step_x = x1 - cx
-	step_y = y1 - cy
-	cx += step_x
-	cy += step_y
-	if collide?(cx, cy)
-	  puts 'collided ici'
-	  collided = true
-	  cx -= step_x
-	  cy -= step_y
-	end
-      else
-	puts 'collided'
-      end
-
-      @position_x = cx
-      @position_y = cy
-      
-      @position_x %= @game.width * CELL_SIZE
-      @position_y %= @game.height * CELL_SIZE
-    else
-      puts "no max, sorry"
     end
+    
+    @position_x = x0
+    @position_y = y0
+    
+    @position_x %= @game.width * CELL_SIZE
+    @position_y %= @game.height * CELL_SIZE
   end
   
   def collide?(x, y)
