@@ -150,6 +150,14 @@ class Game
     end
   end
   
+  def brick_positions
+    bricks = []
+    each_cell do |x, y, item|
+      bricks << [x, y] if item and item.kind == 'brick'
+    end
+    bricks
+  end
+  
   def key_direction(key)
     case key
     when Rubygame::K_RIGHT
