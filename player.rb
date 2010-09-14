@@ -32,10 +32,86 @@ class Player
     end
   end
   
+  def same_signs?(a, b)
+    (a < 0 and b < 0) or (a > 0 and b > 0)
+  end
+  
+  def segment_collision(s1, s2)
+    x1, y1, x2, y2 = s1.map { |x| x.to_f }
+    x3, y3, x4, y4 = s2.map { |x| x.to_f }
+    
+    #long a1, a2, b1, b2, c1, c2 /* Coefficients of line eqns. */
+    #long r1, r2, r3, r4         /* 'Sign' values */
+    #long denom, offset, num     /* Intermediate values */
+
+    #/* Compute a1, b1, c1, where line joining points 1 and 2
+    # * is "a1 x  +  b1 y  +  c1  =  0".
+    # */
+
+    a1 = y2 - y1
+    b1 = x1 - x2
+    c1 = x2 * y1 - x1 * y2
+
+    #/* Compute r3 and r4.
+    # */
+
+    r3 = a1 * x3 + b1 * y3 + c1
+    r4 = a1 * x4 + b1 * y4 + c1
+
+    #/* Check signs of r3 and r4.  If both point 3 and point 4 lie on
+    # * same side of line 1, the line segments do not intersect.
+    # */
+
+    if ( r3 != 0 and r4 != 0 and same_signs?( r3, r4 ))
+      return nil
+    end
+
+    #/* Compute a2, b2, c2 */
+
+    a2 = y4 - y3
+    b2 = x3 - x4
+    c2 = x4 * y3 - x3 * y4
+
+    #/* Compute r1 and r2 */
+
+    r1 = a2 * x1 + b2 * y1 + c2
+    r2 = a2 * x2 + b2 * y2 + c2
+
+    #/* Check signs of r1 and r2.  If both point 1 and point 2 lie
+    # * on same side of second line segment, the line segments do
+    # * not intersect.
+    # */
+
+    if ( r1 != 0 and r2 != 0 and same_signs?( r1, r2 ))
+      return nil
+    end
+
+    #/* Line segments intersect: compute intersection point. 
+    # */
+
+    denom = a1 * b2 - a2 * b1
+    if ( denom == 0 )
+      return nil # collinear
+    end
+    offset = denom < 0 ? - denom / 2 : denom / 2
+
+    #/* The denom/2 is to get rounding instead of truncating.  It
+    # * is added or subtracted to the numerator, depending upon the
+    # * sign of the numerator.
+    # */
+
+    num = b1 * c2 - b2 * c1
+    x = ( num < 0 ? num - offset : num + offset ) / denom
+
+    num = a2 * c1 - a1 * c2
+    y = ( num < 0 ? num - offset : num + offset ) / denom
+
+    [x, y]
+  end
+  
   # applique la direction
   
   def apply_direction(time, with_rope_effect = true)
-    r = with_rope_effect ? rope_effect_up : 0
     gravity = 0 #GRAVITY
 
     @velocity_x = @vector_x * VELOCITY * CELL_SIZE
@@ -49,68 +125,54 @@ class Player
     x1 = new_position_x
     y1 = new_position_y
     
-    dx = x1 - x0
-    dy = y1 - y0
-    
-    max = [dx.abs, dy.abs].max
-    
-    if (max != 0)
-      step_x = dx / max
-      step_y = dy / max
-      
-      # current x and y
-      cx = x0
-      cy = y0
-      collided = false
-    
-      #puts "cx : #{cx}  ###  x1 : #{x1} ||| cy : #{cy}  ###  y1 : #{y1}"
-    
-      dirx = (x1 > x0) ? 1 : -1
-      diry = (y1 > y0) ? 1 : -1
-      if (dirx > 0) && (diry > 0)
-	test_end = proc { (cx < x1) && (cy < y1) }
-      elsif (dirx > 0) && (diry < 0)
-	test_end = proc { (cx < x1) && (cy > y1) }
-      elsif (dirx < 0) && (diry > 0)
-	test_end = proc { (cx > x1) && (cy < y1) }
-      else
-	test_end = proc { (cx > x1) && (cy > y1) }
-      end
-      
-      while test_end.call
-	cx += step_x
-	cy += step_y
-	if collide?(cx, cy)
-	  collided = true
-	  cx -= step_x
-	  cy -= step_y
-	  break
-	end
-      end
-      
-      if !collided
-	step_x = x1 - cx
-	step_y = y1 - cy
-	cx += step_x
-	cy += step_y
-	if collide?(cx, cy)
-	  puts 'collided ici'
-	  collided = true
-	  cx -= step_x
-	  cy -= step_y
-	end
-      else
-	puts 'collided'
-      end
-
-      @position_x = cx
-      @position_y = cy
-      
-      @position_x %= @game.width * CELL_SIZE
-      @position_y %= @game.height * CELL_SIZE
-    else
-      puts "no max, sorry"
+    bricks = @game.brick_positions.map do |x, y|
+      Rubygame::Rect.new x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE
     end
+    
+    move_segment = [
+      x0,
+      y0,
+      x1,
+      y1,
+    ]
+    
+    bricks.each do |rect|
+      rx1 = rect.x - 1
+      ry1 = rect.y - 1
+      rx2 = rect.x + rect.width + 1
+      ry2 = rect.y + rect.height + 1
+      
+      segments = [
+	[rx1, ry1, rx2, ry1], # top
+	[rx2, ry1, rx2, ry2], # right
+	[rx1, ry2, rx2, ry2], # bottom
+	[rx1, ry1, rx1, ry2], # left
+      ]
+      
+      collisions = segments.map do |rect_segment|
+	segment_collision(move_segment, rect_segment)
+      end.compact
+            
+      unless collisions.empty?
+	p ["destinati", x1, y1]
+	x1, y1 = first_collide_point(collisions)
+	x1 -= 0.5
+	y1 -= 0.5
+	p ["collision", x1, y1]
+      end
+    end
+    
+    @position_x = x1
+    @position_y = y1
+    
+    @position_x %= @game.width * CELL_SIZE
+    @position_y %= @game.height * CELL_SIZE
+  end
+  
+  def first_collide_point collisions
+    collisions.sort_by do |x, y|
+      (@position_x - x)**2 + (@position_y - y)**2
+    end.first
   end
   
   def collide?(x, y)

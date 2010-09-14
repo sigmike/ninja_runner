@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'ninja_rope'
+require 'game'
 require 'optparse'
 
 game = Game.new

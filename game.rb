@@ -14,7 +14,7 @@ REPEAT_TIME = 100 # durée d'un tour de jeu
 CELL_SIZE = 24 # nombre de pixels
 GRAVITY = 0.01 # cell/s
 VELOCITY = 0.5 * GRAVITY # cell/s
-
+EPSILON = 0.0001
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
 
 Surface.autoload_dirs = [ 'gfx' ]
@@ -148,6 +148,14 @@ class Game
     each_cell do |x, y, item|
       yield x, y, item if item
     end
+  end
+  
+  def brick_positions
+    bricks = []
+    each_cell do |x, y, item|
+      bricks << [x, y] if item and item.kind == 'brick'
+    end
+    bricks
   end
   
   def key_direction(key)
