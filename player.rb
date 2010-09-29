@@ -93,6 +93,7 @@ class Player
     if ( denom == 0 )
       return nil # collinear
     end
+    
     offset = denom < 0 ? - denom / 2 : denom / 2
 
     #/* The denom/2 is to get rounding instead of truncating.  It
@@ -122,51 +123,79 @@ class Player
     
     x0 = @position_x
     y0 = @position_y
-    x1 = new_position_x
-    y1 = new_position_y
+    x1 = round(new_position_x)
+    y1 = round(new_position_y)
     
     bricks = @game.brick_positions.map do |x, y|
       Rubygame::Rect.new x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE
     end
     
-    move_segment = [
-      x0,
-      y0,
-      x1,
-      y1,
+    # move_segment = x0, y0, x1, y1, offset
+    move_offsets = [
+      [ 0, 0,], # top - left
+      [ CELL_SIZE, 0,], # top - right
+      [ CELL_SIZE , + CELL_SIZE,], # bottom - right
+      [ 0, + CELL_SIZE, ], # bottom - left
     ]
     
-    bricks.each do |rect|
-      rx1 = rect.x - 1
-      ry1 = rect.y - 1
-      rx2 = rect.x + rect.width + 1
-      ry2 = rect.y + rect.height + 1
+    move_segment_origin = [ x0, y0, x1, y1 ]
+    
+    collisions = []
+    move_offsets.each do |move_offset|
+      move_segment = move_segment_origin.dup
       
-      segments = [
-	[rx1, ry1, rx2, ry1], # top
-	[rx2, ry1, rx2, ry2], # right
-	[rx1, ry2, rx2, ry2], # bottom
-	[rx1, ry1, rx1, ry2], # left
-      ]
-      
-      collisions = segments.map do |rect_segment|
-	segment_collision(move_segment, rect_segment)
-      end.compact
+      # apply offset to move segments
+      move_segment[0] += move_offset[0] # x0
+      move_segment[1] += move_offset[1] # y0
+      move_segment[2] += move_offset[0] # x1
+      move_segment[3] += move_offset[1] # y1
+    
+      bricks.each do |rect|
+        rx1 = rect.x - 1
+        ry1 = rect.y - 1
+        rx2 = rect.x + rect.width + 1
+        ry2 = rect.y + rect.height + 1
+        
+        segments = [
+          [rx1, ry1, rx2, ry1], # top
+#           [rx2, ry1, rx2, ry2], # right
+#           [rx1, ry2, rx2, ry2], # bottom
+#           [rx1, ry1, rx1, ry2], # left
+        ]
+        
+        collisions += segments.map do |rect_segment|
+          collide = segment_collision(move_segment, rect_segment)
+          if collide
+            # to put collide like a top left corner
+            collide[0] -= move_offset[0] + 0.5
+            collide[1] -= move_offset[1] + 0.5
             
-      unless collisions.empty?
-	p ["destinati", x1, y1]
-	x1, y1 = first_collide_point(collisions)
-	x1 -= 0.5
-	y1 -= 0.5
-	p ["collision", x1, y1]
+            # round values
+            collide[0] = round(collide[0])
+            collide[1] = round(collide[1])
+          end
+          collide
+        end.compact
       end
     end
     
-    @position_x = x1
-    @position_y = y1
+    unless collisions.empty?
+      pp "---------------"
+      pp @position_x.to_s + ", " + @position_y.to_s
+      pp collisions
+      x1, y1 = first_collide_point(collisions)
+    end
     
-    @position_x %= @game.width * CELL_SIZE
-    @position_y %= @game.height * CELL_SIZE
+    
+    @position_x = round(x1)
+    @position_y = round(y1)
+    
+    @position_x %= GRID_WIDTH_PX
+    @position_y %= GRID_HEIGHT_PX
+  end
+  
+  def round(number)
+    (number * 100).ceil / 100.0
   end
   
   def first_collide_point collisions

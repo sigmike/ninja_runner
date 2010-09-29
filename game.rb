@@ -9,13 +9,18 @@ require 'pp'
 Rubygame.init
 include Rubygame
 
-ITEM_LIFETIME = 3000 # vie des items
+ITEM_LIFETIME = 5000 # vie des items
 REPEAT_TIME = 100 # durée d'un tour de jeu
 CELL_SIZE = 24 # nombre de pixels
 GRAVITY = 0.01 # cell/s
 VELOCITY = 0.5 * GRAVITY # cell/s
 EPSILON = 0.0001
 MILLISECONDS_PER_CELL = 1000.0 / GRAVITY
+GRID_WIDTH = 40
+GRID_HEIGHT = 24
+
+GRID_WIDTH_PX = GRID_WIDTH * CELL_SIZE
+GRID_HEIGHT_PX = GRID_HEIGHT * CELL_SIZE
 
 Surface.autoload_dirs = [ 'gfx' ]
 
@@ -38,8 +43,8 @@ class Game
     @clock = Rubygame::Clock.new
     Rubygame::TTF.setup
     @font = Rubygame::TTF.new 'fonts/arial.ttf', 32
-    @width = 40
-    @height = 24
+    @width = GRID_WIDTH
+    @height = GRID_HEIGHT
     @score = 0
     @last_down_time = 0.0
     @grid = Array.new(@width) { Array.new(@height) }
